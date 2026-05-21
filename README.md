@@ -8,14 +8,18 @@ This repository allows you to set up your own personal NetNavi, complete with th
 
 ## 🚀 Quick Install (Windows)
 
-1. Download or clone this repository to your computer.
-2. Right-click `install.ps1` and select **Run with PowerShell**.
-3. Follow the interactive "Awakening" boot sequence in your terminal to name your Navi and configure your keys.
-4. Open the `NetNavi-OS-Windows` folder in Obsidian.
-5. Install an AI (Claude/Gemini/Antigravity) in the folder/workspace so it can read the `CLAUDE.md` file.
-6. Ask the AI if the Semantic Firewall, Gemini CLI, and dual-brain architecture are operative.
-7. Tell the AI the topics you like and have it make a note entry (the more notes you make, the more unique your Navi will be).
-8. Based on the topics you like, ask the AI to recommend some skills.
+> 👋 **Not a technical user?** Open `START_HERE.md` inside the downloaded folder — it walks you through everything with zero terminal knowledge required.
+
+**For everyone else:**
+
+1. **Download** this repository as a `.zip` (click the green **Code** button → **Download ZIP**) and unzip it.
+2. **Double-click** `▶ INSTALL ME FIRST.bat` — it installs all dependencies automatically.
+3. **Double-click** `setup_keys.bat` to enter your Pinecone API key (free at pinecone.io).
+4. **Open Obsidian** → *Open folder as vault* → select the `NetNavi-OS-Windows` folder.
+5. **Install an AI** (Claude/Gemini/Antigravity) in the folder so it can read the `CLAUDE.md` file.
+6. Ask the AI: *"Read CLAUDE.md and tell me if you are operational."*
+7. Tell the AI the topics you like and have it make a note entry (the more notes, the more unique your Navi).
+8. Ask the AI to recommend skills based on your interests.
 9. Personalize your Navi!
 
 ---
