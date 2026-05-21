@@ -10,6 +10,7 @@ This repository allows you to set up your own personal NetNavi, complete with th
 2. Right-click `install.ps1` and select **Run with PowerShell**.
 3. Follow the interactive "Awakening" boot sequence in your terminal to name your Navi and configure your keys.
 4. Open the `NetNavi-OS-Windows` folder in Obsidian.
+5. Install an AI (Claude/Gemini/Antigravity) in the folder/workspace so it can read the `CLAUDE.md` file.
 
 ## 🧠 The Ghost
 Your Navi starts as a blank slate. By writing Diary and Atlas entries, you feed the knowledge graph. The system inherently understands its lore (Megaman Battle Network, Ghost in the Shell) and will grow and personalize itself around your data.
