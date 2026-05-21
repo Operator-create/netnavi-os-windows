@@ -1,0 +1,5 @@
+{
+  "task": "handoff_test",
+  "layer": "PRIVATE",
+  "prompt": "Analyze the log files in .claudian and summarize errors."
+}

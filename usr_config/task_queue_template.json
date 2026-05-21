@@ -1,0 +1,24 @@
+{
+  "pipeline_name": "Example Automation Pipeline",
+  "approved": false,
+  "tasks": [
+    {
+      "step": 1,
+      "script": "${VAULT_PATH}/usr/scripts/n8n_proxy.py",
+      "args": [
+        "--workflow",
+        "test-hook",
+        "--payload",
+        "'{\"start\": true}'"
+      ]
+    },
+    {
+      "step": 2,
+      "script": "${VAULT_PATH}/usr/scripts/vault_intel.py",
+      "args": [
+        "--draft",
+        "\"Pipeline Orchestration\""
+      ]
+    }
+  ]
+}
