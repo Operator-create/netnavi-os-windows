@@ -28,7 +28,10 @@ $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";"
 Write-Host "`n[3/4] Installing Gemini CLI & Action Layer Dependencies..." -ForegroundColor Yellow
 npm install -g @google/gemini-cli
 
-Write-Host "`n[4/4] Installation Complete!" -ForegroundColor Green
+Write-Host "`n[4/5] Opening Antigravity IDE plugin page in your browser..." -ForegroundColor Yellow
+Start-Process "https://antigravity.google/"
+
+Write-Host "`n[5/5] Installation Complete!" -ForegroundColor Green
 Write-Host "=================================================" -ForegroundColor Cyan
 
 Write-Host "`nExecuting The Awakening Sequence..." -ForegroundColor Magenta
