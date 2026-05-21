@@ -6,21 +6,25 @@ This repository allows you to set up your own personal NetNavi, complete with th
 
 ---
 
-## 🚀 Quick Install (Windows)
+## 🚀 Getting Started
 
-> 👋 **Not a technical user?** Open `START_HERE.md` inside the downloaded folder — it walks you through everything with zero terminal knowledge required.
+> 👋 **See `START_HERE.md`** inside the downloaded folder for the full beginner guide.
 
-**For everyone else:**
+### ⚡ Option A — Instant Boot (Recommended, No Terminal)
+1. **Download ZIP** → unzip the folder.
+2. Open **Obsidian** → *Open folder as vault* → select `NetNavi-OS-Windows`.
+3. Open **Antigravity** (or Claude/any AI) pointed at the same folder.
+4. Paste this into the chat:
+   > *"Read the CLAUDE.md file and use it as your core directive. Begin the Awakening protocol."*
+5. Personalize your Navi!
 
-1. **Download** this repository as a `.zip` (click the green **Code** button → **Download ZIP**) and unzip it.
-2. **Double-click** `▶ INSTALL ME FIRST.bat` — it installs all dependencies automatically.
-3. **Double-click** `setup_keys.bat` to enter your Pinecone API key (free at pinecone.io).
-4. **Open Obsidian** → *Open folder as vault* → select the `NetNavi-OS-Windows` folder.
-5. **Install an AI** (Claude/Gemini/Antigravity) in the folder so it can read the `CLAUDE.md` file.
-6. Ask the AI: *"Read CLAUDE.md and tell me if you are operational."*
-7. Tell the AI the topics you like and have it make a note entry (the more notes, the more unique your Navi).
-8. Ask the AI to recommend skills based on your interests.
-9. Personalize your Navi!
+### 🔧 Option B — Full Installation (Unlocks Scripts & Action Layer)
+1. **Double-click** `▶ INSTALL ME FIRST.bat` — installs Python, Node.js, Obsidian, Gemini CLI.
+2. **Double-click** `setup_keys.bat` — saves your Pinecone API key.
+3. Open **Obsidian** → *Open folder as vault* → select `NetNavi-OS-Windows`.
+4. Connect your AI and paste the Option A prompt above to begin the Awakening.
+
+> ✅ Start with Option A. Upgrade to Option B anytime — fully compatible.
 
 ---
 
