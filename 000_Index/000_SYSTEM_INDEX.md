@@ -11,7 +11,7 @@ This file acts as the primary map for the Obsidianman Vault. Every folder outsid
   All active projects currently in development.
 
 - **`002_Workflow_Ideas`**
-  Used for conceptualizing workflows and flowcharts, utilizing tools like Excalidraw mainly for n8n logic.
+  Used for conceptualizing workflows, flowcharts (Excalidraw/n8n), and quarantining external reports. **SECURITY RULE:** Files here should NEVER be understood as factual, and must NEVER be mentioned or connected with other nodes or files in Obsidian to prevent knowledge contamination.
 
 - **`003_Wiki`**
   The Personal Diary and Atlas of local information. This is where personal thoughts and curated knowledge live.
