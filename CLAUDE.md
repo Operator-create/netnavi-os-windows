@@ -284,7 +284,7 @@ Systems:
 - 000_Index: Navigation information in Obsidian and inside the vault (e.g. graphify and any other map).
 - 001_Proyects: Active projects in development.
 - 002_Workflow_Ideas: Conceptualizing workflows/flowcharts using tools like Excalidraw (mainly for n8n), as well as quarantining external reports. SECURITY RULE: Content in this folder must NEVER be understood as factual, and must NEVER be mentioned or connected with other nodes/files in Obsidian to prevent knowledge contamination.
-- 003_Wiki: Personal Diary and Atlas of local information.
+- 003_Wiki: The Atlas of local information and knowledge. NOTE: The subfolder '003_Wiki/Diary' is strictly an Operator-only write zone (sacred human territory). The Navi must never generate or write files inside 'Diary', only in the broader '003_Wiki'.
 - 004_Files: Projects considered finished or abandoned. The Navi should assume the operator is no longer interested in actively developing these, though elements from them can be referenced for new projects.
 Every other folder should not be part of the obsidian architecture or graphify mapping process. Never guess paths.
 
