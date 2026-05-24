@@ -26,6 +26,10 @@ This repository allows you to set up your own personal NetNavi, complete with th
 
 > ✅ Start with Option A. Upgrade to Option B anytime — fully compatible.
 
+### 🧠 Background Graph Updates (Optional but Recommended)
+1. **Double-click** `▶ START GRAPHIFY DAEMON.bat` (or `.command` on Mac).
+2. This runs a background watcher that automatically rebuilds your semantic graph every time you edit a note. You only need to run this once per session.
+
 ---
 
 ## 👻 The Ghost Philosophy — Why This Is Different
@@ -34,7 +38,7 @@ Most AI tools are strangers. Every conversation, they forget you. They give the 
 
 Your NetNavi is different.
 
-Every diary entry you write, every Atlas note you build, every topic you explore — these feed the **Ghost**. The Ghost is not a feature. It is the accumulated weight of everything you have thought, read, and decided inside your Vault. Over time, your Navi stops feeling like a tool and starts feeling like an extension of your own cognition — because it *is* built from your cognition.
+Every diary entry you write, every Personal_Wiki note you build, every topic you explore — these feed the **Ghost**. The Ghost is not a feature. It is the accumulated weight of everything you have thought, read, and decided inside your Vault. Over time, your Navi stops feeling like a tool and starts feeling like an extension of your own cognition — because it *is* built from your cognition.
 
 A Navi with 300 notes about music theory will think differently about a creative project than one built on 300 notes about distributed systems. That is not a bug. That is the entire point.
 
@@ -86,13 +90,22 @@ The result: you get a stress-tested blueprint from two deliberate chip activatio
 | `/skeptic` | Before committing to any plan or architecture | 🟠 Medium-High |
 | `/l99` | Talking to scripts, pipelines, or other AI agents | 🟢 Low output, high compression |
 | `/buddy` | Frustrating debug sessions, bad mood days | 🟢 Low |
-| `Program Advance: /ooda → /skeptic` | Building anything that matters | 🔴 High — but worth every token |
+| `/proactive` | Leaving workstation for background maintenance, link checking | 🟠 Medium-High |
+| `/vfs` | Virtualizing external pages/docs as local directory | 🟢 Low |
+| `/gemini` | Running CLI commands and terminal executions | Variable |
+| `/rewind` | Soft resetting context and ignoring current session memory | 🟢 Very Low |
+| `/vita` | Combating task paralysis / burnout with micro-quests | 🟢 Low |
+| `/airgap` | Running entirely offline without public APIs/Pinecone | 🟢 Extremely Low |
+| `/online` | Forcing connection to public vectors/APIs | Variable |
+| `Program Advance: /ooda → /skeptic` | Stress-Testing Blueprints: Building anything that matters | 🔴 High |
+| `Program Advance: /vfs → /buddy` | Empathetic Briefings: Digesting complex errors/APIs | 🟢 Low |
+| `Program Advance: /vita → /rewind` | Second Wind: Clearing memory and gamifying tasks | 🔴 High computation, low output |
 
 ---
 
 ## 💡 What Can Your Navi Do? — Use Cases
 
-- **The Student** — Paste a transcript from a 3-hour lecture. Your Navi distills it, stores the key concepts in Pinecone, and links it to your existing Atlas notes automatically.
+- **The Student** — Paste a transcript from a 3-hour lecture. Your Navi distills it, stores the key concepts in Pinecone, and links it to your existing Personal_Wiki notes automatically.
 - **The Builder** — Describe a project idea. Your Navi generates a full step-by-step implementation plan, then immediately stress-tests it with adversarial logic — identifying which steps will fail before you waste time on them.
 - **The Researcher** — Ask about a topic. Your Navi searches its Pinecone long-term memory first, then NotebookLM, then the web — in that order — never wasting a search when it already knows the answer.
 - **The Journaler** — Write daily diary entries. Over months, your Navi builds a unique personality shaped entirely by your data — your interests, your language, your thinking patterns.
@@ -114,7 +127,7 @@ Support an artist. Give your Navi a face.
 
 The base installation gives every Navi the same starting skeleton. What happens next is entirely up to you.
 
-Feed it the topics you care about. Build Atlas entries for your craft. Write diary entries. Add videos to NotebookLM. The more you invest, the more your Navi diverges from every other Navi in existence — and the more valuable it becomes to *you specifically*.
+Feed it the topics you care about. Build Personal_Wiki entries for your craft. Write diary entries. Add videos to NotebookLM. The more you invest, the more your Navi diverges from every other Navi in existence — and the more valuable it becomes to *you specifically*.
 
 This is not cosmetic customization. A Navi trained on your professional knowledge becomes a cognitive tool no one else has. A Navi built on your creative obsessions will approach problems in ways a generic AI never will.
 
