@@ -5,7 +5,7 @@ import os
 import subprocess
 import argparse
 
-BRIDGE_SCRIPT = "${VAULT_PATH}/usr/scripts/gemini_bridge.py"
+BRIDGE_SCRIPT = "/media/davidr/Obsidianman/usr/scripts/gemini_bridge.py"
 
 def run_pipeline(queue_file):
     if not os.path.exists(queue_file):

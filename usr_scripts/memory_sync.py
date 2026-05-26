@@ -7,7 +7,7 @@ import subprocess
 import hashlib
 from datetime import datetime
 
-VAULT_PATH = "${VAULT_PATH}"
+VAULT_PATH = "/media/davidr/Obsidianman"
 FIREWALL_SCRIPT = f"{VAULT_PATH}/usr/scripts/semantic_firewall.py"
 BRIDGE_SCRIPT = f"{VAULT_PATH}/usr/scripts/gemini_bridge.py"
 SYNC_LOG = f"{VAULT_PATH}/.claudian/memory_sync.log"

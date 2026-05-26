@@ -7,7 +7,7 @@ import argparse
 from datetime import datetime
 import hashlib
 
-VAULT_PATH = "${VAULT_PATH}"
+VAULT_PATH = "/media/davidr/Obsidianman"
 PREFLIGHT_SCRIPT = f"{VAULT_PATH}/usr/scripts/preflight_check.py"
 FIREWALL_SCRIPT = f"{VAULT_PATH}/usr/scripts/semantic_firewall.py"
 LOG_FILE_1 = f"{VAULT_PATH}/.claudian/gemini_bridge.log"

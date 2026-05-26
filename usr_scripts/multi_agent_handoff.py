@@ -6,7 +6,7 @@ import json
 import subprocess
 from datetime import datetime
 
-VAULT_PATH = "${VAULT_PATH}"
+VAULT_PATH = "/media/davidr/Obsidianman"
 BRIDGE_SCRIPT = f"{VAULT_PATH}/usr/scripts/gemini_bridge.py"
 COORD_LOG = f"{VAULT_PATH}/.claudian/coordination.log"
 AUDIT_LOG = f"{VAULT_PATH}/003_Resources/+/gemini_audit_log.md"

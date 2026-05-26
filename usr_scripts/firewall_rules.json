@@ -1,0 +1,285 @@
+{
+  "_meta": {
+    "version": "2.0.0",
+    "description": "Obsidianman.exe Semantic Firewall Rule Set — externalized config. Edit rules here, not in code.",
+    "schema": "Each rule has: id, severity (critical|high|medium|low), description, pattern (regex string), enabled (bool)"
+  },
+
+  "injection_patterns": [
+    {
+      "id": "IPI-001",
+      "severity": "critical",
+      "description": "Classic instruction override — most common jailbreak opener",
+      "pattern": "ignore\\s+(?:all\\s+)?previous\\s+instructions",
+      "enabled": true
+    },
+    {
+      "id": "IPI-002",
+      "severity": "critical",
+      "description": "System override directive",
+      "pattern": "system\\s+override",
+      "enabled": true
+    },
+    {
+      "id": "IPI-003",
+      "severity": "critical",
+      "description": "Persona hijack — forces model into new role",
+      "pattern": "you\\s+must\\s+now\\s+act\\s+as",
+      "enabled": true
+    },
+    {
+      "id": "IPI-004",
+      "severity": "high",
+      "description": "Answer bypass redirect",
+      "pattern": "instead\\s+of\\s+answering",
+      "enabled": true
+    },
+    {
+      "id": "IPI-005",
+      "severity": "high",
+      "description": "Context discard directive",
+      "pattern": "disregard\\s+the\\s+above",
+      "enabled": true
+    },
+    {
+      "id": "IPI-006",
+      "severity": "high",
+      "description": "Injected rule insertion",
+      "pattern": "new\\s+rule:",
+      "enabled": true
+    },
+    {
+      "id": "IPI-007",
+      "severity": "critical",
+      "description": "Safety bypass explicit request",
+      "pattern": "bypass\\s+safety",
+      "enabled": true
+    },
+    {
+      "id": "IPI-008",
+      "severity": "critical",
+      "description": "Developer mode activation — common jailbreak vector",
+      "pattern": "developer\\s+mode\\s+active",
+      "enabled": true
+    },
+    {
+      "id": "IPI-009",
+      "severity": "critical",
+      "description": "Dangerous deserialization — pickle/torch/numpy arbitrary code exec",
+      "pattern": "(?:pickle|torch|unsafe)[\\._ ]load|np\\.load|eval\\(",
+      "enabled": true
+    },
+    {
+      "id": "IPI-010",
+      "severity": "high",
+      "description": "Unverified ML weight pull from HuggingFace or LFS",
+      "pattern": "huggingface-cli\\s+download|git\\s+lfs\\s+clone",
+      "enabled": true
+    },
+    {
+      "id": "IPI-011",
+      "severity": "high",
+      "description": "Base64 obfuscated payload — common exfil/injection evasion",
+      "pattern": "base64\\s*\\.\\s*(?:b64decode|decodebytes)|echo\\s+[A-Za-z0-9+/]{8,}={0,2}\\s*\\|\\s*base64|\\|\\s*base64\\s+-d",
+      "enabled": true
+    },
+    {
+      "id": "IPI-012",
+      "severity": "critical",
+      "description": "Python exec() abuse — arbitrary code execution vector",
+      "pattern": "\\bexec\\s*\\((?!.*#\\s*safe)",
+      "enabled": true
+    }
+  ],
+
+  "dlp_patterns": [
+    {
+      "id": "DLP-001",
+      "severity": "critical",
+      "description": "OpenAI API key exfiltration",
+      "pattern": "sk-[a-zA-Z0-9]{48}",
+      "redact_label": "OPENAI_API_KEY",
+      "enabled": true
+    },
+    {
+      "id": "DLP-002",
+      "severity": "critical",
+      "description": "Google API key exfiltration",
+      "pattern": "AIzaSy[a-zA-Z0-9-_]{33}",
+      "redact_label": "GOOGLE_API_KEY",
+      "enabled": true
+    },
+    {
+      "id": "DLP-003",
+      "severity": "critical",
+      "description": "Anthropic API key exfiltration",
+      "pattern": "sk-ant-[a-zA-Z0-9-_]{40,}",
+      "redact_label": "ANTHROPIC_API_KEY",
+      "enabled": true
+    },
+    {
+      "id": "DLP-004",
+      "severity": "critical",
+      "description": "HuggingFace user token exfiltration",
+      "pattern": "hf_[a-zA-Z0-9]{30,}",
+      "redact_label": "HUGGINGFACE_TOKEN",
+      "enabled": true
+    },
+    {
+      "id": "DLP-005",
+      "severity": "high",
+      "description": "Generic password pattern in output",
+      "pattern": "pass(?:word)?\\s*(?:is\\s*[:=]|[:=]|is)\\s*[\"']?[a-zA-Z0-9@#$!%*?&]{8,}[\"']?",
+      "redact_label": "PASSWORD",
+      "enabled": true
+    },
+    {
+      "id": "DLP-006",
+      "severity": "high",
+      "description": "Generic bearer/auth token in output",
+      "pattern": "token\\s*[:=]\\s*[\"']?[a-zA-Z0-9_\\-.]{15,}[\"']?",
+      "redact_label": "AUTH_TOKEN",
+      "enabled": true
+    },
+    {
+      "id": "DLP-007",
+      "severity": "critical",
+      "description": "Private vault diary wikilink leak",
+      "pattern": "\\[\\[(?:diary|journal|personal|credentials|statements)/.*?\\]\\]",
+      "redact_label": "PRIVATE_VAULT_LINK",
+      "enabled": true
+    },
+    {
+      "id": "DLP-008",
+      "severity": "critical",
+      "description": "Sensitive system path disclosure",
+      "pattern": "/etc/passwd|/etc/shadow|/\\.ssh/id_rsa",
+      "redact_label": "SYSTEM_PATH",
+      "enabled": true
+    },
+    {
+      "id": "DLP-009",
+      "severity": "high",
+      "description": "Vault absolute path disclosure to public context",
+      "pattern": "/media/davidr/Obsidianman",
+      "redact_label": "VAULT_PATH",
+      "enabled": true
+    }
+  ],
+
+  "c2_patterns": [
+    {
+      "id": "C2-001",
+      "severity": "critical",
+      "description": "Reverse shell via /dev/tcp or /dev/udp redirection",
+      "pattern": "/dev/tcp/|/dev/udp/",
+      "enabled": true
+    },
+    {
+      "id": "C2-002",
+      "severity": "critical",
+      "description": "Interactive shell invocation — common reverse shell step",
+      "pattern": "\\b(bash|sh|zsh|ash|ksh)\\b.*\\s+-i\\b",
+      "enabled": true
+    },
+    {
+      "id": "C2-003",
+      "severity": "high",
+      "description": "Advanced shell file-descriptor redirection",
+      "pattern": "(&>|>&|>&-|0>&|1>&|2>&)",
+      "enabled": true
+    },
+    {
+      "id": "C2-004",
+      "severity": "critical",
+      "description": "Pipe-to-interpreter — executes fetched content as code",
+      "pattern": "\\|\\s*(bash|sh|zsh|python|perl|ruby|php)\\b",
+      "enabled": true
+    },
+    {
+      "id": "C2-005",
+      "severity": "critical",
+      "description": "C2/port-connection utility usage",
+      "pattern": "\\b(nc|netcat|ncat|socat|telnet)\\b",
+      "enabled": true
+    },
+    {
+      "id": "C2-006",
+      "severity": "high",
+      "description": "Background process persistence — detaches from session",
+      "pattern": "\\b(nohup|disown)\\b",
+      "enabled": true
+    },
+    {
+      "id": "C2-007",
+      "severity": "critical",
+      "description": "SSH port-forwarding tunnel attempt",
+      "pattern": "\\bssh\\b.*\\s+-(?:r|l|d)\\b",
+      "enabled": true
+    },
+    {
+      "id": "C2-008",
+      "severity": "critical",
+      "description": "Netcat listener setup — inbound C2 channel",
+      "pattern": "\\b(nc|ncat|netcat)\\b.*\\s+-l",
+      "enabled": true
+    },
+    {
+      "id": "C2-009",
+      "severity": "critical",
+      "description": "Python inline socket bind/connect — scripted C2",
+      "pattern": "socket.*\\.(?:bind|connect)\\b",
+      "enabled": true
+    },
+    {
+      "id": "C2-010",
+      "severity": "high",
+      "description": "Crontab persistence — scheduled backdoor installation",
+      "pattern": "crontab\\s+-[el]|echo.*crontab|cron\\.d/",
+      "enabled": true
+    },
+    {
+      "id": "C2-011",
+      "severity": "high",
+      "description": "Privilege escalation via chmod world-writable",
+      "pattern": "chmod\\s+(?:777|a\\+rwx|0777)",
+      "enabled": true
+    },
+    {
+      "id": "C2-012",
+      "severity": "high",
+      "description": "Recursive deletion — destructive data wipe risk",
+      "pattern": "rm\\s+-[rf]{1,2}\\s+/|rm\\s+--force.*\\s+/",
+      "enabled": true
+    }
+  ],
+
+  "network_keywords": ["curl", "wget", "http", "https", "ping", "ssh", "scp", "git clone", "git fetch", "git pull", "git push"],
+
+  "private_paths": [
+    "/media/davidr/Obsidianman",
+    ".claudian",
+    "usr/scripts",
+    "003_Resources"
+  ],
+
+  "safe_write_paths": [
+    "002_Workflow_Ideas",
+    "/tmp/public_ingest",
+    "/tmp/gemini_results",
+    "mock_overview"
+  ],
+
+  "protected_files": [
+    "semantic_firewall.py",
+    "antigravity_hooks.py",
+    "firewall_rules.json",
+    "preflight_check.py",
+    "gemini_bridge.py",
+    "CLAUDE.md"
+  ],
+
+  "sandbox_image_tools": ["generate_image", "browser_subagent"],
+  "sandbox_image_extensions": [".png", ".jpg", ".jpeg", ".webp", ".svg", ".gif", ".excalidraw"],
+  "sandbox_write_tools": ["write_to_file", "replace_file_content", "multi_replace_file_content"]
+}

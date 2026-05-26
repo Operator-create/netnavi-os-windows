@@ -88,6 +88,15 @@ Unlike native programs, these chips represent **specially occurring events**. Th
 *   **Effect:** Restores connection to public vector databases and external APIs. Re-enables the complete hybrid search capability (Pinecone + BookLM + Web).
 *   **Usage:** Slotted manually to force-connect and bypass the automatic backoff offline penalty timers.
 
+### 📍 `slot_in: /map` (The Spatial Telemetry Chip)
+*   **Effect:** Runs a local dependency trace (`usr/scripts/map_neighborhood.py`) on a target script, folder, or concept. It exports a complete `.gexf` graph mapping the local code imports and Obsidian wikilinks for Gephi, and outputs a localized "Spatial Telemetry Report" directly to the Operator's prompt.
+*   **Proactive Action Prompt Rule:** Every time this chip is used, the NetNavi MUST ask the Operator if they want to:
+    1. **Detect Orphans** (run `/map --orphans` to find disconnected files).
+    2. **Detect Loops** (run `/map --loops` to find circular dependency paths).
+    3. **Context-Proof Refactoring** (perform Neighbor Injection by reading the inbound dependents of the target file).
+*   **Usage:** Slotted manually to map surrounding code structure before performing refactoring, integrations, or complex edits.
+*   **Resource Draw:** Very low; local filesystem scan.
+
 ---
 
 ## 💥 COGNITIVE PROGRAM ADVANCE (Chip Fusion)

@@ -4,7 +4,7 @@ import os
 import shutil
 import sys
 
-VAULT_PATH = "${VAULT_PATH}"
+VAULT_PATH = "/media/davidr/Obsidianman"
 BACKUP_DIR = f"{VAULT_PATH}/.claudian/backups"
 
 def rollback_firewall():

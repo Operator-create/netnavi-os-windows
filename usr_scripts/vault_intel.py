@@ -4,8 +4,8 @@ import subprocess
 import os
 import sys
 
-BRIDGE_SCRIPT = "${VAULT_PATH}/usr/scripts/gemini_bridge.py"
-VAULT_PATH = "${VAULT_PATH}"
+BRIDGE_SCRIPT = "/media/davidr/Obsidianman/usr/scripts/gemini_bridge.py"
+VAULT_PATH = "/media/davidr/Obsidianman"
 STAGING_DIR = "/tmp/vault_staging"
 
 def run_bridge(task_name, prompt):
