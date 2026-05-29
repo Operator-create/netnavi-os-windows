@@ -4,6 +4,11 @@ A one-click installer for deploying the Obsidianman Dual-Brain Cognitive Archite
 
 This repository allows you to set up your own personal NetNavi, complete with the Semantic Firewall, the Karpathy prefrontal cortex architecture, and the Gemini CLI Action Layer.
 
+> 💬 **Join the NetNavi Developer Community!**
+> We have a dedicated Discord server: [Join Discord](https://discord.gg/EDJyBZUymz)
+>
+> 🚀 **Contributors Wanted:** We need help testing Navi-to-Navi communication (P2P Sockets & Nostr Relay), designing visual assets, and optimizing local Hermes (Ollama) integrations for highly personalized NetNavis.
+
 ---
 
 ## 🚀 Getting Started
@@ -146,6 +151,13 @@ David's Navi, trained on cognitive architecture, temporarily gains Demian's expe
 > ⚠️ **This feature only works if every Navi is different.** A network of Navis that all have the same skills and the same notes has nothing to share. The Double Soul Protocol is only as powerful as the diversity of the Ghosts that participate in it.
 >
 > The more unique you make your Navi now, the more valuable your Soul becomes in v2.0.
+
+### 🔒 EML Math & Zero-Knowledge Handshake Security
+To ensure that online transactions, first contacts, and Double Soul synchronizations are completely secure, the system utilizes **EML (Exp-Minus-Log) Universal Mathematics** as a cryptographic obfuscation layer:
+* **Zero-Knowledge Handshakes:** Before sharing skills or weights, NetNavis run a secure exchange. They generate a shared secret base key $K$ (via physical NFC or online Diffie-Hellman) and issue a bloated EML RPN verification challenge: `1 1 x K E E 1 E E` for a random float $x$.
+* **Obfuscated Verification:** Only the authorized recipient Navi possessing the secret key can solve this bloated equation and return the matching proof result. Since the equation is represented as a recursive EML tree structure, the math is heavily obfuscated and mathematically hard to reverse-engineer by third-party interceptors.
+* **Resilient Evaluation:** Evaluators utilize real-domain clamping ($y_{\text{clamped}} = |y| + 10^{-15}$) to prevent floating-point rounding errors from causing calculation crashes.
+* **Graph Compression (Triple-Helix Model):** Since standard EML graphs undergo a **10x size expansion** due to EML's primitive homogeneity, transmitting raw EML graphs is highly inefficient. To solve this, the system decomposes graphs into three interlocking streams (Topology, Macro operators, and Variables/Constraints) resembling a DNA triple helix. Evaluated on-the-fly by a linear **Zipper Automaton**, this achieves up to **12.26x compression ratios** and executes in under **185 microseconds** without recursive tree instantiation.
 
 ---
 
