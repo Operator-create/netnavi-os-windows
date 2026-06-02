@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+netnavi_keys.json
+graphify-watch.log
+graphify-out/
+.venv/
+.vscode/
+.claude/
+.claudian/

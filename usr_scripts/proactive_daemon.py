@@ -4,8 +4,8 @@ import re
 import sys
 import time
 
-VAULT_DIR = "/media/davidr/Obsidianman"
-INBOX_FILE = os.path.join(VAULT_DIR, "003_Resources/+/proactive_inbox.md")
+VAULT_DIR = "/media/davidr/Obsidianman/Vault"
+INBOX_FILE = os.path.join(VAULT_DIR, "003_Wiki/Resources/+/proactive_inbox.md")
 
 def scan_vault():
     all_files = {}

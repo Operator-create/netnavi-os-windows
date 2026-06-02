@@ -4,7 +4,7 @@ import time
 import sys
 
 VAULT_PATH = os.path.dirname(os.path.abspath(__file__))
-ATLAS_DIR = os.path.join(VAULT_PATH, "003_Resources", "Atlas")
+ATLAS_DIR = os.path.join(VAULT_PATH, "Vault", "003_Wiki", "Resources", "Atlas")
 PET_TEMPLATE = os.path.join(ATLAS_DIR, "Obsidianman_exe_PET.md")
 
 def type_text(text, delay=0.03):
@@ -54,7 +54,7 @@ def main():
     # --- 3.2 Customization Instructions ---
     print("\n--- PHASE 1: IDENTITY CUSTOMIZATION ---")
     type_text(f"To bring {navi_name} to life, please open Obsidian and open this Vault.")
-    type_text(f"Navigate to: 003_Resources/Atlas/{navi_name}_exe_PET.md")
+    type_text(f"Navigate to: Vault/003_Wiki/Resources/Atlas/{navi_name}_exe_PET.md")
     type_text("Update the file with your unique Aspect (visual appearance) and Personality traits.")
     input("\nPress ENTER when you have understood...")
     

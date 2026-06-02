@@ -188,7 +188,7 @@ The NetNavi widget is the Ghost's face — the visible, reactive surface of a sy
 
 - [[World of Ideas]] — the Platonic layer the Ghost navigates intuitively
 
-- [[003_003_Wiki/cognitive-battle-chips]] — discrete capabilities that a Ghost integrates into fluid action
+- [[cognitive-battle-chips]] — discrete capabilities that a Ghost integrates into fluid action
 
 - [[Pygmalion effect]] — the paradox: does belief in the Ghost help create it?
 

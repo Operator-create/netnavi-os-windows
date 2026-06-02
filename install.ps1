@@ -31,6 +31,9 @@ npm install -g @google/gemini-cli
 Write-Host "`n[4/5] Opening Antigravity IDE plugin page in your browser..." -ForegroundColor Yellow
 Start-Process "https://antigravity.google/"
 
+Write-Host "`n[4.5/5] Installing Python Package Dependencies..." -ForegroundColor Yellow
+pip install websockets cryptography
+
 Write-Host "`n[5/5] Installation Complete!" -ForegroundColor Green
 Write-Host "=================================================" -ForegroundColor Cyan
 

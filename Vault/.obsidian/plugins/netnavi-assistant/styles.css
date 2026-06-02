@@ -1,0 +1,442 @@
+/* ═══════════════════════════════════════════════════════
+   NetNavi Assistant — Full System Styles
+   ═══════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+/* ─── Variables ─────────────────────────────────────────── */
+:root {
+    --nn-accent:     #b088ff; /* Pulsing neon violet */
+    --nn-accent-dim: #7c4dff; /* Indigo-purple */
+    --nn-bg:         rgba(13, 10, 28, 0.94); /* Dark deep space purple */
+    --nn-bg-card:    rgba(25, 20, 48, 0.96);
+    --nn-border:     rgba(176, 136, 255, 0.3);
+    --nn-text:       #e0dbff; /* Soft purple-tinted white */
+    --nn-muted:      #897fb8;
+    --nn-accept:     #a6e3a1;
+    --nn-reject:     #f38ba8;
+    --nn-radius:     8px; /* Slightly retro blocky corners */
+    --nn-font:       'Outfit', sans-serif;
+    --nn-mono:       'JetBrains Mono', monospace;
+}
+
+/* ─── Avatar Widget ──────────────────────────────────────── */
+.netnavi-widget-wrapper {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    background: var(--nn-bg);
+    border: 2px solid var(--nn-accent);
+    border-radius: var(--nn-radius);
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.4), inset 0 0 10px rgba(176, 136, 255, 0.2);
+    overflow: hidden;
+    user-select: none;
+    cursor: grab;
+    backdrop-filter: blur(12px);
+    transition: box-shadow 0.25s ease, transform 0.1s ease;
+    font-family: var(--nn-font);
+    min-width: 160px;
+}
+.netnavi-widget-wrapper:hover {
+    box-shadow: 0 0 25px rgba(138, 43, 226, 0.6), inset 0 0 15px rgba(176, 136, 255, 0.3);
+}
+.netnavi-dragging {
+    cursor: grabbing !important;
+    transform: scale(1.02);
+    box-shadow: 0 0 35px rgba(138, 43, 226, 0.8) !important;
+}
+
+.netnavi-avatar-container {
+    position: relative;
+    background: #0d0d1a url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><rect width="20" height="20" fill="none" stroke="%23b088ff" stroke-width="0.5" stroke-opacity="0.1"/></svg>');
+    overflow: hidden;
+    border-bottom: 2px solid var(--nn-accent);
+}
+
+/* Scanlines and retro grid flickers */
+.netnavi-avatar-container::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 10;
+    background-size: 100% 3px, 3px 100%;
+    pointer-events: none;
+}
+
+/* Idle pulse glow animation */
+.netnavi-avatar-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 20px rgba(0,229,255,0.06);
+    pointer-events: none;
+    animation: nn-pulse 3s ease-in-out infinite;
+}
+@keyframes nn-pulse {
+    0%, 100% { opacity: 0.4; }
+    50%       { opacity: 1; }
+}
+
+/* Media elements inside container */
+.netnavi-avatar-container img,
+.netnavi-avatar-container video {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: contain;
+}
+
+.netnavi-chat-box {
+    padding: 6px;
+    background: rgba(10, 10, 20, 0.8);
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+.netnavi-chat-input {
+    width: 100%;
+    box-sizing: border-box;
+    resize: none;
+    background: rgba(255,255,255,0.04);
+    color: var(--nn-text);
+    border: 1px solid var(--nn-border);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-family: var(--nn-mono);
+    font-size: 12px;
+    outline: none;
+    cursor: text;
+    transition: border-color 0.2s;
+}
+.netnavi-chat-input:focus {
+    border-color: var(--nn-accent);
+    box-shadow: 0 0 0 2px rgba(0,229,255,0.1);
+}
+.netnavi-chat-input:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ─── Response Panel ─────────────────────────────────────── */
+.netnavi-response-panel {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 420px;
+    max-height: 60vh;
+    z-index: 9998;
+    display: flex;
+    flex-direction: column;
+    background: var(--nn-bg-card);
+    border: 1px solid var(--nn-border);
+    border-radius: var(--nn-radius);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0,229,255,0.05);
+    backdrop-filter: blur(16px);
+    font-family: var(--nn-font);
+    overflow: hidden;
+}
+
+.netnavi-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: rgba(0,229,255,0.06);
+    border-bottom: 1px solid var(--nn-border);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--nn-accent);
+    letter-spacing: 0.06em;
+}
+.netnavi-panel-header button {
+    background: transparent;
+    border: none;
+    color: var(--nn-muted);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.2s;
+}
+.netnavi-panel-header button:hover { color: var(--nn-reject); }
+
+.netnavi-panel-history {
+    overflow-y: auto;
+    flex: 1;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--nn-border) transparent;
+}
+
+/* ─── Message Bubbles ────────────────────────────────────── */
+.netnavi-message {
+    max-width: 90%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--nn-text);
+    animation: nn-slide-in 0.2s ease;
+}
+@keyframes nn-slide-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.netnavi-message-user {
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.15);
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
+.netnavi-message-assistant {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+}
+/* Markdown inside responses */
+.netnavi-message-assistant p  { margin: 0.3em 0; }
+.netnavi-message-assistant h1,
+.netnavi-message-assistant h2,
+.netnavi-message-assistant h3 { color: var(--nn-accent); margin: 0.5em 0 0.2em; }
+.netnavi-message-assistant code {
+    font-family: var(--nn-mono);
+    background: rgba(0,0,0,0.3);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+.netnavi-message-assistant pre code {
+    display: block;
+    padding: 10px;
+    overflow-x: auto;
+    font-size: 12px;
+}
+
+/* ─── Thinking Dots ─────────────────────────────────────── */
+.netnavi-thinking {
+    display: flex;
+    gap: 5px;
+    padding: 4px 0;
+}
+.netnavi-thinking span {
+    width: 7px; height: 7px;
+    background: var(--nn-accent);
+    border-radius: 50%;
+    animation: nn-bounce 1.2s ease-in-out infinite;
+    opacity: 0.7;
+}
+.netnavi-thinking span:nth-child(2) { animation-delay: 0.2s; }
+.netnavi-thinking span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes nn-bounce {
+    0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+    40%            { transform: scale(1); opacity: 1; }
+}
+
+/* ─── Action Buttons ────────────────────────────────────── */
+.netnavi-action-buttons {
+    margin-top: 10px;
+    border-top: 1px solid var(--nn-border);
+    padding-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+.netnavi-action-buttons > p {
+    width: 100%;
+    margin: 0 0 6px;
+    font-size: 11px;
+    font-family: var(--nn-mono);
+}
+.netnavi-btn {
+    padding: 5px 14px;
+    border-radius: 6px;
+    border: 1px solid;
+    font-size: 12px;
+    font-family: var(--nn-font);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.netnavi-btn-accept {
+    background: rgba(166,227,161,0.12);
+    border-color: var(--nn-accept);
+    color: var(--nn-accept);
+}
+.netnavi-btn-accept:hover { background: rgba(166,227,161,0.22); }
+.netnavi-btn-reject {
+    background: rgba(243,139,168,0.10);
+    border-color: var(--nn-reject);
+    color: var(--nn-reject);
+}
+.netnavi-btn-reject:hover { background: rgba(243,139,168,0.2); }
+.netnavi-btn-preview {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.15);
+    color: var(--nn-muted);
+}
+.netnavi-btn-preview:hover { color: var(--nn-text); }
+.netnavi-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.netnavi-diff-preview {
+    width: 100%;
+    margin-top: 8px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 12px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* ─── Settings Panel ─────────────────────────────────────── */
+.netnavi-registry-grid .netnavi-emotion-card {
+    transition: box-shadow 0.2s;
+}
+.netnavi-registry-grid .netnavi-emotion-card:hover {
+    box-shadow: 0 0 12px rgba(0,229,255,0.12);
+}
+.netnavi-drop-zone {
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--nn-muted);
+    transition: background 0.2s, color 0.2s;
+}
+.netnavi-drop-zone:hover {
+    background: rgba(0,229,255,0.04);
+    color: var(--nn-accent);
+}
+
+/* ─── Docked View Layout ──────────────────────────────────── */
+.netnavi-docked-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--nn-bg);
+    border: none;
+    overflow-y: auto;
+    padding: 10px;
+    box-sizing: border-box;
+    gap: 12px;
+}
+
+.netnavi-docked-container .netnavi-widget-wrapper {
+    position: relative;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 100%;
+    margin-bottom: 0px;
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.4), inset 0 0 10px rgba(176, 136, 255, 0.2);
+    border: 2px solid var(--nn-accent);
+}
+
+.netnavi-docked-container .netnavi-response-panel {
+    position: relative;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 50vh !important;
+    flex: 1;
+    box-shadow: none;
+    border: 1.5px solid var(--nn-border);
+}
+
+/* ─── HP & Status Indicator ────────────────────────────────── */
+.netnavi-hp-indicator {
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border-bottom: 1.5px solid var(--nn-border);
+    font-family: var(--nn-mono);
+    font-size: 11px;
+    color: var(--nn-text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.netnavi-hp-bar-container {
+    width: 100px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--nn-border);
+}
+
+.netnavi-hp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--nn-accent), #7c4dff);
+    width: 100%;
+    animation: hp-pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes hp-pulse {
+    0% { opacity: 0.8; }
+    100% { opacity: 1; filter: drop-shadow(0 0 2px var(--nn-accent)); }
+}
+
+/* ─── GBA Caret Indicator ─────────────────────────────────── */
+.netnavi-message-assistant {
+    position: relative;
+    padding-bottom: 20px;
+}
+.netnavi-message-assistant::after {
+    content: '▼';
+    position: absolute;
+    bottom: 6px;
+    right: 12px;
+    color: var(--nn-accent);
+    font-size: 10px;
+    font-family: monospace;
+    animation: caret-blink 0.8s infinite steps(2);
+}
+
+@keyframes caret-blink {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+/* ─── Mic Button Styles ───────────────────────────────────── */
+.netnavi-mic-button {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--nn-border);
+    color: var(--nn-text);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+    flex-shrink: 0;
+}
+.netnavi-mic-button:hover {
+    background: rgba(176, 136, 255, 0.1);
+    border-color: var(--nn-accent);
+}
+.netnavi-mic-button.netnavi-recording {
+    background: rgba(243, 139, 168, 0.2);
+    border-color: var(--nn-reject);
+    animation: nn-recording-pulse 1.5s infinite;
+}
+@keyframes nn-recording-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}

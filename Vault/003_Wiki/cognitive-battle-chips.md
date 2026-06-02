@@ -56,7 +56,7 @@ Unlike native programs, these chips represent **specially occurring events**. Th
 
 ### ⚙️ `slot_in: /proactive` (The Autonomous Background Daemon Chip)
 *   **Effect:** Deactivates passive listening and launches a background iteration loop where the NetNavi performs maintenance, runs wiki-link checks, scans vector indexes, and visualizes recent GEXF updates without needing direct user prompts.
-*   **Usage:** Slotted when the Operator leaves the workstation. It operates in a loop and writes a diagnostics summary to `/media/davidr/Obsidianman/003_003_Wiki/+/inbox.md`.
+*   **Usage:** Slotted when the Operator leaves the workstation. It operates in a loop and writes a diagnostics summary to `/media/davidr/Obsidianman/Vault/003_Wiki/+/inbox.md`.
 *   **Resource Draw:** Medium to High resource draw; runs in terminal background.
 
 ### 🔌 `slot_in: /vfs` (Virtual Filesystem Mounting Chip)

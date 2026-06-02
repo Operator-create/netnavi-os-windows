@@ -1,0 +1,10 @@
+{
+    "id": "netnavi-assistant",
+    "name": "NetNavi Assistant",
+    "version": "1.0.0",
+    "minAppVersion": "1.4.0",
+    "description": "A fully customizable NetNavi Assistant UI that dynamically reacts to Obsidian events.",
+    "author": "Operator",
+    "authorUrl": "",
+    "isDesktopOnly": true
+}

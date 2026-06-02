@@ -11,7 +11,7 @@ import time
 BRIDGE_SCRIPT = "/media/davidr/Obsidianman/usr/scripts/gemini_bridge.py"
 FIREWALL_SCRIPT = "/media/davidr/Obsidianman/usr/scripts/semantic_firewall.py"
 INGEST_DIR = "/tmp/public_ingest"
-VAULT_DIR = "/media/davidr/Obsidianman"
+VAULT_DIR = "/media/davidr/Obsidianman/Vault"
 MEDIA_TARGET_DIR = os.path.join(VAULT_DIR, "002_Workflow_Ideas")
 
 def run_bridge(task_name, prompt):
@@ -119,7 +119,7 @@ def ingest_research(query):
     print(f"Raw Output:       {raw_file}")
     print(f"Sanitized Output: {sanitized_file}")
     print("\nTo explicitly promote this to the vault, run:")
-    print(f"cp {sanitized_file} /media/davidr/Obsidianman/003_Resources/+/{safe_name}_research.md")
+    print(f"cp {sanitized_file} /media/davidr/Obsidianman/Vault/003_Wiki/Resources/+/{safe_name}_research.md")
     print("="*50)
 
 def main():

@@ -8,7 +8,7 @@ import time
 VAULT_PATH = "/media/davidr/Obsidianman"
 STATUS_FILE = f"{VAULT_PATH}/.claudian/status.json"
 N8N_PROXY = f"{VAULT_PATH}/usr/scripts/n8n_proxy.py"
-OUTPUT_REPORT = f"{VAULT_PATH}/003_Resources/Atlas/ai-news-digest-letter.md"
+OUTPUT_REPORT = f"{VAULT_PATH}/Vault/003_Wiki/Resources/Atlas/ai-news-digest-letter.md"
 
 def update_status(state, task=None):
     try:
@@ -27,13 +27,13 @@ def compile_report(local_only=False):
         diagnostics_content = f"""*   **Target Mode:** Local-First (n8n bypassed by operator command `--local`)
 *   **Timestamp:** {time.strftime("%Y-%m-%d %H:%M:%S")}
 *   **Status:** Successfully written to Local Vault. n8n proxy was not invoked.
-*   **Resolution:** Report letter created directly at `003_Resources/Atlas/ai-news-digest-letter.md`."""
+*   **Resolution:** Report letter created directly at `Vault/003_Wiki/Resources/Atlas/ai-news-digest-letter.md`."""
     else:
         diagnostics_content = f"""*   **Target Webhook:** `http://localhost:5678/webhook/report_delivery`
 *   **Attempt Timestamp:** {time.strftime("%Y-%m-%d %H:%M:%S")}
 *   **Primary Pathway Result:** `❌ CONNECTION REFUSED` (n8n local server offline or port 5678 closed).
 *   **Resilience Protocol Triggered:** **Offline Sovereignty & Graceful Fallback Protocol** (Section 3.3).
-*   **Resolution:** Diverted report payload directly to the Local Vault. File generated at `003_Resources/Atlas/ai-news-digest-letter.md`."""
+*   **Resolution:** Diverted report payload directly to the Local Vault. File generated at `Vault/003_Wiki/Resources/Atlas/ai-news-digest-letter.md`."""
 
     report_content = f"""# ✉️ Executive AI News Briefing — Operator Dispatch
 

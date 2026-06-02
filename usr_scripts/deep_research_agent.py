@@ -27,7 +27,7 @@ QUARANTINE_DIR = "/tmp/public_ingest"
 os.makedirs(QUARANTINE_DIR, exist_ok=True)
 RAW_TEMP    = os.path.join(QUARANTINE_DIR, "dra_raw_temp.txt")
 LOG_FILE    = os.path.join(QUARANTINE_DIR, "deep_research_agent.log")
-REPORT_FILE = "/media/davidr/Obsidianman/003_Resources/Atlas/deep-research-report-2026.md"
+REPORT_FILE = "/media/davidr/Obsidianman/Vault/003_Wiki/Resources/Atlas/deep-research-report-2026.md"
 
 FIREWALL_SCRIPT = "/media/davidr/Obsidianman/usr/scripts/semantic_firewall.py"
 

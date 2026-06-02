@@ -41,7 +41,7 @@ def rollback_staging():
         print("⚠️ Vault intelligence staging directory already empty.")
 
 def rollback_multi_agent():
-    target = f"{VAULT_PATH}/003_Resources/Atlas/agent-roles.md"
+    target = f"{VAULT_PATH}/Vault/003_Wiki/Resources/Atlas/agent-roles.md"
     if os.path.exists(target):
         os.remove(target)
         print("✅ Phase 3F: Multi-agent coordination boundary document removed. System reverts to single-agent mode.")

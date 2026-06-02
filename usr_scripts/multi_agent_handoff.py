@@ -9,7 +9,7 @@ from datetime import datetime
 VAULT_PATH = "/media/davidr/Obsidianman"
 BRIDGE_SCRIPT = f"{VAULT_PATH}/usr/scripts/gemini_bridge.py"
 COORD_LOG = f"{VAULT_PATH}/.claudian/coordination.log"
-AUDIT_LOG = f"{VAULT_PATH}/003_Resources/+/gemini_audit_log.md"
+AUDIT_LOG = f"{VAULT_PATH}/Vault/003_Wiki/Resources/+/gemini_audit_log.md"
 
 def log_coordination(task, status, output_hash):
     os.makedirs(os.path.dirname(COORD_LOG), exist_ok=True)

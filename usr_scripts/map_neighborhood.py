@@ -6,10 +6,10 @@ import xml.etree.ElementTree as ET
 import argparse
 
 # Configure root directories dynamically (portable across drives/deployments)
-VAULT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-OUTPUT_GEXF = os.path.join(VAULT_ROOT, ".claudian/memory/neighborhood.gexf")
-OUTPUT_WIKI_GEXF = os.path.join(VAULT_ROOT, ".claudian/memory/wiki_neighborhood.gexf")
-OUTPUT_CODE_GEXF = os.path.join(VAULT_ROOT, ".claudian/memory/code_neighborhood.gexf")
+VAULT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'Vault'))
+OUTPUT_GEXF = os.path.abspath(os.path.join(VAULT_ROOT, "../.claudian/memory/neighborhood.gexf"))
+OUTPUT_WIKI_GEXF = os.path.abspath(os.path.join(VAULT_ROOT, "../.claudian/memory/wiki_neighborhood.gexf"))
+OUTPUT_CODE_GEXF = os.path.abspath(os.path.join(VAULT_ROOT, "../.claudian/memory/code_neighborhood.gexf"))
 
 def clean_label(path):
     """Get relative path from VAULT_ROOT for clean labeling."""
@@ -25,11 +25,11 @@ def find_all_files(root_dir):
         '000_Index',
         '001_Proyects',
         '002_Workflow_Ideas',
-        '003_Resources',
+        '003_Wiki/Resources',
         '003_Wiki',
         '004_Files',
-        'usr/scripts',
-        'antigravity-action-layer/scripts'
+        '../usr/scripts',
+        '../antigravity-action-layer/scripts'
     ]
     
     for folder in whitelist:

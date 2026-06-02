@@ -40,9 +40,10 @@ if not logger.handlers:
 
 import socket
 
-_VAULT_ROOT = os.environ.get("OBSIDIANMAN_VAULT", "/media/davidr/Obsidianman")
-_SESSION_FILE = os.path.join(_VAULT_ROOT, ".claudian", "sessions", "l99_session.json")
-_SPOOL_FILE = os.path.join(_VAULT_ROOT, ".claudian", "sessions", "offline_spool.json")
+_WORKSPACE_ROOT = "/media/davidr/Obsidianman"
+_VAULT_ROOT = os.environ.get("OBSIDIANMAN_VAULT", os.path.join(_WORKSPACE_ROOT, "Vault"))
+_SESSION_FILE = os.path.join(_WORKSPACE_ROOT, ".claudian", "sessions", "l99_session.json")
+_SPOOL_FILE = os.path.join(_WORKSPACE_ROOT, ".claudian", "sessions", "offline_spool.json")
 _SPOOL_MD_FILE = os.path.join(_VAULT_ROOT, "002_Workflow_Ideas", "spooled_tasks.md")
 
 def check_internet() -> bool:
