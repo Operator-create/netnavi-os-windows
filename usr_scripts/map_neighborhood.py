@@ -106,29 +106,63 @@ def parse_md_dependencies(file_path, resolver_map):
     return list(set(dependencies))
 
 def build_graph(root_dir, target_path=None):
+    # Find all files to get python files and build resolver map for python files
     unique_paths, resolver_map = find_all_files(root_dir)
-    nodes = set(unique_paths)
+    nodes = set()
     edges = []
     
+    # Load index data
+    import json
+    index_path = os.path.abspath(os.path.join(VAULT_ROOT, "../.claudian/memory/vault_index.json"))
+    index_data = {}
+    if os.path.exists(index_path):
+        try:
+            with open(index_path, 'r', encoding='utf-8') as f:
+                index_data = json.load(f)
+        except Exception:
+            pass
+            
+    # Process markdown files from index if available, otherwise fallback to directory crawl
+    if index_data:
+        for rel_path, record in index_data.items():
+            path = os.path.abspath(os.path.join(VAULT_ROOT, rel_path))
+            if os.path.exists(path):
+                nodes.add(path)
+                # Add body links
+                for dep_rel in record.get("body_links", []):
+                    dep_path = os.path.abspath(os.path.join(VAULT_ROOT, dep_rel))
+                    if os.path.exists(dep_path):
+                        edges.append((path, dep_path))
+                # Add typed frontmatter links
+                for rel_type, dep_rels in record.get("links", {}).items():
+                    for dep_rel in dep_rels:
+                        dep_path = os.path.abspath(os.path.join(VAULT_ROOT, dep_rel))
+                        if os.path.exists(dep_path):
+                            edges.append((path, dep_path))
+    else:
+        # Fallback crawl for markdown files
+        for path in unique_paths:
+            if path.endswith('.md'):
+                nodes.add(path)
+                deps = parse_md_dependencies(path, resolver_map)
+                for dep in deps:
+                    if dep != path:
+                        edges.append((path, dep))
+                        
+    # Process python files (always crawl since they aren't in the markdown index)
     for path in unique_paths:
         if path.endswith('.py'):
+            nodes.add(path)
             deps = parse_py_dependencies(path, resolver_map)
-        elif path.endswith('.md'):
-            deps = parse_md_dependencies(path, resolver_map)
-        else:
-            deps = []
-            
-        for dep in deps:
-            if dep != path:
-                edges.append((path, dep))
-                
-    # If a specific target is set, calculate modularity / neighborhood
+            for dep in deps:
+                if dep != path:
+                    edges.append((path, dep))
+                    
+    # Target neighbors calculation
     target_neighbors = []
     if target_path:
-        # Resolve target path if base name was provided
         resolved_target = resolver_map.get(target_path, None)
         if resolved_target:
-            # Deduplicate using a set to be completely safe
             added_neighbors = set()
             for src, tgt in edges:
                 if src == resolved_target and tgt not in added_neighbors:
@@ -137,7 +171,7 @@ def build_graph(root_dir, target_path=None):
                 elif tgt == resolved_target and src not in added_neighbors:
                     target_neighbors.append((clean_label(src), "Inbound Dependent"))
                     added_neighbors.add(src)
-
+                    
     return nodes, edges, target_neighbors
 
 def find_loops(edges):
@@ -211,17 +245,21 @@ def export_to_gexf(nodes, edges, output_path):
 
 def calculate_context_scores(root_dir, target):
     """Calculate Semantic Context Scores for a target file's convolved neighborhood (D1 and D2)."""
-    unique_paths, resolver_map = find_all_files(root_dir)
+    # Use build_graph directly to get nodes and edges (highly optimized, uses vault_index.json)
+    nodes, edges, _ = build_graph(root_dir)
+    
+    # We still need a resolver map to find the resolved target path
+    _, resolver_map = find_all_files(root_dir)
     resolved_target = resolver_map.get(target, None)
     
     # Try resolving relative path if not resolved yet
     if not resolved_target:
         potential_path = os.path.abspath(os.path.join(root_dir, target))
-        if potential_path in unique_paths:
+        if potential_path in nodes:
             resolved_target = potential_path
         else:
             # Substring match resolver
-            for p in unique_paths:
+            for p in nodes:
                 if target in p:
                     resolved_target = p
                     break
@@ -230,24 +268,16 @@ def calculate_context_scores(root_dir, target):
         return []
 
     # Build adjacency maps
-    out_adj = {p: set() for p in unique_paths}
-    in_adj = {p: set() for p in unique_paths}
+    out_adj = {p: set() for p in nodes}
+    in_adj = {p: set() for p in nodes}
     
-    for path in unique_paths:
-        if path.endswith('.py'):
-            deps = parse_py_dependencies(path, resolver_map)
-        elif path.endswith('.md'):
-            deps = parse_md_dependencies(path, resolver_map)
-        else:
-            deps = []
+    for src, tgt in edges:
+        if src in out_adj and tgt in out_adj:
+            out_adj[src].add(tgt)
+            in_adj[tgt].add(src)
             
-        for dep in deps:
-            if dep != path and dep in out_adj:
-                out_adj[path].add(dep)
-                in_adj[dep].add(path)
-                
     # Centrality (Total degree)
-    degrees = {p: len(out_adj[p]) + len(in_adj[p]) for p in unique_paths}
+    degrees = {p: len(out_adj[p]) + len(in_adj[p]) for p in nodes}
     max_deg = max(degrees.values()) if degrees else 0
     
     scores = {}
@@ -335,6 +365,95 @@ def print_context_block(scored_neighbors, max_files=2, min_score=0.5):
         except Exception as e:
             print(f"⚠️ Failed to read context file {label}: {e}")
 
+def get_keywords(text):
+    """Extract clean words from text, ignoring common stopwords."""
+    words = re.findall(r'[a-zA-Z0-9]+', text.lower())
+    stopwords = {
+        'the', 'a', 'of', 'and', 'in', 'to', 'for', 'is', 'on', 'with', 'by', 
+        'at', 'an', 'this', 'that', 'from', 'as', 'it', 'or', 'are', 'was', 
+        'be', 'not', 'your', 'our', 'my', 'their', 'we', 'you', 'me', 'us',
+        'he', 'she', 'they', 'him', 'her', 'them', 'but', 'how', 'why', 'what',
+        'where', 'when', 'who', 'which'
+    }
+    return set(w for w in words if w not in stopwords and len(w) > 2)
+
+def print_section_context_block(scored_neighbors, target, max_files=2, min_score=0.5):
+    """Output only relevant sections and summaries of neighboring files using the index."""
+    import json
+    index_path = os.path.abspath(os.path.join(VAULT_ROOT, "../.claudian/memory/vault_index.json"))
+    
+    index_data = {}
+    if os.path.exists(index_path):
+        try:
+            with open(index_path, 'r', encoding='utf-8') as f:
+                index_data = json.load(f)
+        except Exception as e:
+            print(f"⚠️ Failed to load vault index for section extraction: {e}")
+            
+    valid_neighbors = [n for n in scored_neighbors if n["score"] >= min_score]
+    valid_neighbors = valid_neighbors[:max_files]
+    
+    if not valid_neighbors:
+        print("No high-relevance neighbor files meet the context score threshold.")
+        return
+        
+    # Extract keywords from target to find relevant sections
+    target_keywords = set()
+    if target:
+        target_name = os.path.splitext(os.path.basename(target))[0]
+        target_keywords = get_keywords(target_name)
+        
+    for n in valid_neighbors:
+        path = n["path"]
+        label = n["label"]
+        score = n["score"]
+        rel = n["relationship"]
+        
+        # Check if the file is in our index
+        rel_path = clean_label(path)
+        record = index_data.get(rel_path, None)
+        
+        if record and path.endswith('.md'):
+            summary = record.get("summary", "")
+            node_type = record.get("node_type", "note")
+            sections = record.get("sections", {})
+            
+            print(f"\n### 📍 Neighbor Context Injection: `{label}` (Score: {score} | {rel})")
+            print(f"- **Type:** {node_type}")
+            if summary:
+                print(f"- **Summary:** {summary}")
+            
+            print("```markdown")
+            # Always print Introduction section if it exists
+            intro = sections.get("Introduction", None)
+            if intro:
+                print(f"## Introduction\n{intro}\n")
+                
+            # Print other sections if they match target keywords
+            for sec_title, sec_content in sections.items():
+                if sec_title == "Introduction":
+                    continue
+                
+                title_words = get_keywords(sec_title)
+                content_words = get_keywords(sec_content)
+                
+                if target_keywords & (title_words | content_words):
+                    print(f"## {sec_title}\n{sec_content}\n")
+            print("```")
+        else:
+            # Fallback to full file
+            ext = os.path.splitext(path)[1]
+            lang = "python" if ext == ".py" else "markdown"
+            try:
+                with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                    content = f.read()
+                print(f"\n### 📍 Neighbor Context Injection (Full File): `{label}` (Score: {score} | {rel})")
+                print(f"```{lang}")
+                print(content)
+                print("```")
+            except Exception as e:
+                print(f"⚠️ Failed to read context file {label}: {e}")
+
 def main():
     parser = argparse.ArgumentParser(description="Antigravity Spatial Telemetry & Neighbor Context Tool")
     parser.add_argument("target", nargs="?", default=None, help="Target file name, path, or keyword to analyze")
@@ -342,6 +461,7 @@ def main():
     parser.add_argument("--loops", action="store_true", help="Report dependency loops (directed cycles)")
     parser.add_argument("--scores", action="store_true", help="Calculate and print semantic context scores for neighbors")
     parser.add_argument("--context", action="store_true", help="Print convolved neighborhood context blocks for prompt injection")
+    parser.add_argument("--section-level", action="store_true", help="Format and print only relevant sections of neighbor notes using vault_index.json")
     args = parser.parse_args()
 
     # Always build the base graph to export GEXF for Gephi
@@ -398,7 +518,10 @@ def main():
             sys.exit(1)
         scored_neighbors = calculate_context_scores(VAULT_ROOT, args.target)
         print(f"## 📎 CONVOLVED CONTEXT INJECTION (Target: `{args.target}`)")
-        print_context_block(scored_neighbors)
+        if args.section_level:
+            print_section_context_block(scored_neighbors, args.target)
+        else:
+            print_context_block(scored_neighbors)
         
     elif args.target:
         print(f"### 📍 Spatial Telemetry Report for: `{args.target}`")

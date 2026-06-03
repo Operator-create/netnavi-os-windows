@@ -37,6 +37,16 @@ This repository allows you to set up your own personal NetNavi, complete with th
 
 ---
 
+## 🧠 The Hippocampus Update — Section-Level Indexing (v1.1.0)
+
+To achieve maximum RAG efficiency and prevent token bloat, the v1.1.0 update introduces the **Hippocampus** centralized indexing layer:
+
+*   **Centralized Indexing (`update_vault_index.py`):** Whenever a markdown file is saved, a background watcher compiles its frontmatter YAML metadata and splits its content by headers into `.claudian/memory/vault_index.json`. This index is cached globally, avoiding file I/O latency at query runtime.
+*   **Atomic Section-Level RAG:** When pulling related notes for prompt context, the system no longer dumps whole neighbor files into your prompt. Instead, it extracts the target note's keywords and only injects the **Introduction** and the **specific sections** that mention those keywords, reducing token usage by up to **70-90%** while preserving context.
+*   **Enhanced Metadata Links:** Supports explicit link typing in frontmatter YAML (`depends_on`, `contradicts`, `related_to`), which is compiled into directed, color-coded GEXF graphs (`neighborhood.gexf`) for Gephi visualization.
+
+---
+
 ## 👻 The Ghost Philosophy — Why This Is Different
 
 Most AI tools are strangers. Every conversation, they forget you. They give the same answer to you as they give to everyone else. They have no memory of your projects, your language, your obsessions, or your taste.

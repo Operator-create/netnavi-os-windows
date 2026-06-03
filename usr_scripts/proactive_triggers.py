@@ -47,41 +47,42 @@ except ImportError:
 # ---------------------------------------------------------------------------
 
 def update_widget_state(state: str, task: str):
-    """Update status.json to sync visual state of NetNavi widget."""
-    if not os.path.exists(_STATUS_FILE):
-        os.makedirs(os.path.dirname(_STATUS_FILE), exist_ok=True)
-        initial_data = {
-            "current_state": "idle",
-            "source": "Antigravity",
-            "task": "",
-            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-        }
+    """Update status.json to sync visual state of NetNavi widget atomically."""
+    os.makedirs(os.path.dirname(_STATUS_FILE), exist_ok=True)
+    
+    data = {
+        "current_state": "idle",
+        "source": "Antigravity",
+        "task": "",
+        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    }
+    
+    if os.path.exists(_STATUS_FILE):
         try:
-            with open(_STATUS_FILE, "w") as f:
-                json.dump(initial_data, f, indent=2)
+            with open(_STATUS_FILE, "r") as f:
+                data = json.load(f)
         except Exception:
-            return
+            pass
+
+    data["current_state"] = state
+    data["task"] = task
+    data["timestamp"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    data["source"] = "Antigravity"
 
     try:
-        with open(_STATUS_FILE, "r") as f:
-            data = json.load(f)
-        
-        data["current_state"] = state
-        data["task"] = task
-        data["timestamp"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-        data["source"] = "Antigravity"
-        
-        with open(_STATUS_FILE, "w") as f:
+        temp_file = _STATUS_FILE + ".tmp"
+        with open(temp_file, "w") as f:
             json.dump(data, f, indent=2)
-        logger.info("Widget state updated to '%s' (task: %s)", state, task)
+        os.replace(temp_file, _STATUS_FILE)
+        logger.info("Widget state updated to '%s' (task: %s) atomically", state, task)
     except Exception as e:
-        logger.error("Failed to update status.json: %s", e)
+        logger.error("Failed to update status.json atomically: %s", e)
 
 # ---------------------------------------------------------------------------
 # Rebuild & Diagnostics Runner
 # ---------------------------------------------------------------------------
 
-async def run_rebuild_and_diagnostics() -> bool:
+async def run_rebuild_and_diagnostics(changed_files: Optional[List[str]] = None) -> bool:
     """Executes spatial-mapper graph rebuild and runs link/duplicate diagnostics."""
     logger.info("Executing vault rebuild and diagnostics scan...")
     
@@ -90,6 +91,29 @@ async def run_rebuild_and_diagnostics() -> bool:
 
     success = True
     try:
+        # 1.5. Update vault index via update_vault_index.py
+        index_script = os.path.join(_VAULT_ROOT, "usr", "scripts", "update_vault_index.py")
+        if os.path.exists(index_script):
+            if changed_files and len(changed_files) <= 5:
+                for f in changed_files:
+                    logger.info("Updating index incrementally for %s", f)
+                    proc = await asyncio.create_subprocess_exec(
+                        sys.executable, index_script, "--file", f,
+                        stdout=asyncio.subprocess.PIPE,
+                        stderr=asyncio.subprocess.PIPE
+                    )
+                    await proc.communicate()
+            else:
+                logger.info("Updating index (full rebuild)...")
+                proc = await asyncio.create_subprocess_exec(
+                    sys.executable, index_script, "--full-rebuild",
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE
+                )
+                await proc.communicate()
+        else:
+            logger.warning("update_vault_index.py not found at %s", index_script)
+
         # 2. Rebuild graph via spatial-mapper (map_neighborhood.py)
         mapper_path = os.path.join(_VAULT_ROOT, "usr", "scripts", "map_neighborhood.py")
         if os.path.exists(mapper_path):
@@ -111,8 +135,10 @@ async def run_rebuild_and_diagnostics() -> bool:
         # 3. Run diagnostics and write proactive report
         if HAS_DAEMON_LIB:
             logger.info("Running proactive_daemon diagnostics...")
-            md_files, broken_links, duplicates = proactive_daemon.scan_vault()
+            md_files, broken_links, duplicates, vault_map = proactive_daemon.scan_vault()
             proactive_daemon.write_report(md_files, broken_links, duplicates)
+            if hasattr(proactive_daemon, "write_vault_map"):
+                proactive_daemon.write_vault_map(vault_map)
             logger.info("Diagnostics report written successfully.")
         else:
             logger.warning("proactive_daemon library could not be imported — diagnostics skipped")
@@ -143,12 +169,13 @@ class VaultChangeTrigger:
         """
         # check if any markdown file changed
         md_changed = False
+        changed_files = []
         for c in changes:
             # Change objects from watchfiles can have path as string or object
             path = getattr(c, "path", str(c))
             if path.endswith(".md"):
                 md_changed = True
-                break
+                changed_files.append(path)
 
         if not md_changed:
             return
@@ -158,12 +185,12 @@ class VaultChangeTrigger:
             self._debounce_task.cancel()
             logger.debug("Debounce: cancelled preceding scheduled rebuild")
 
-        self._debounce_task = asyncio.create_task(self._run_debounced(ctx))
+        self._debounce_task = asyncio.create_task(self._run_debounced(ctx, changed_files))
 
-    async def _run_debounced(self, ctx: Any):
+    async def _run_debounced(self, ctx: Any, changed_files: List[str]):
         try:
             await asyncio.sleep(self.delay)
-            res = await run_rebuild_and_diagnostics()
+            res = await run_rebuild_and_diagnostics(changed_files)
             if res and ctx and hasattr(ctx, "send"):
                 await ctx.send("Vault graph and proactive diagnostics updated successfully.")
         except asyncio.CancelledError:
@@ -210,6 +237,69 @@ def make_periodic_diagnostics_trigger(interval_seconds: int = 3600):
         return None
 
     return every(interval_seconds, periodic_diagnostics_check)
+
+
+class TelegramInboxTrigger:
+    def __init__(self, inbox_path: str):
+        self.inbox_path = inbox_path
+
+    async def handle_change(self, ctx: Any, changes: List[Any]):
+        """
+        Callback triggered on file changes to telegram_inbox.json.
+        """
+        changed = False
+        for c in changes:
+            path = getattr(c, "path", str(c))
+            if path.endswith("telegram_inbox.json"):
+                changed = True
+                break
+
+        if not changed or not os.path.exists(self.inbox_path):
+            return
+
+        # Give the file writer a moment to finish writing
+        await asyncio.sleep(0.1)
+
+        try:
+            with open(self.inbox_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            
+            task = data.get("task", "")
+            sender = data.get("sender", "Operator")
+            timestamp = data.get("timestamp", "")
+
+            # Clear the file first to prevent loops
+            try:
+                os.remove(self.inbox_path)
+            except Exception:
+                pass
+
+            if task and ctx and hasattr(ctx, "send"):
+                await ctx.send(
+                    f"📥 [Telegram Task Received]\n"
+                    f"From: {sender}\n"
+                    f"Task: {task}\n"
+                    f"Time: {timestamp}\n\n"
+                    f"Please execute this task, verify the results, and send the final response back to "
+                    f"Telegram by running the send tool: `python3 usr/scripts/telegram_bridge.py --send \"<your response>\"`"
+                )
+        except Exception as e:
+            logger.error("Failed to process Telegram inbox trigger: %s", e)
+
+
+def make_telegram_inbox_trigger(inbox_path: str = os.path.join(_VAULT_ROOT, ".claudian", "telegram_inbox.json")):
+    """
+    Creates and returns an Antigravity 2.0 on_file_change trigger watching telegram_inbox.json.
+    Defensively returns None if google.antigravity triggers are missing.
+    """
+    try:
+        from google.antigravity.triggers import on_file_change
+    except ImportError:
+        logger.debug("google.antigravity triggers not installed — inbox trigger dummy generated")
+        return None
+
+    trigger_handler = TelegramInboxTrigger(inbox_path)
+    return on_file_change(inbox_path, trigger_handler.handle_change)
 
 
 # ---------------------------------------------------------------------------
