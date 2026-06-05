@@ -145,3 +145,4 @@ For [[Obsidianman.exe]], we can chain our event-driven battle chips sequentially
 - [[P.E.T.]]
 - [[Netnavi]]
 - [[Obsidianman.exe]]
+- [[agent-skills-taxonomy]] — The standardized taxonomy for Agent Skills.
