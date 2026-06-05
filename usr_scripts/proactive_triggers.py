@@ -144,6 +144,24 @@ async def run_rebuild_and_diagnostics(changed_files: Optional[List[str]] = None)
             logger.warning("proactive_daemon library could not be imported — diagnostics skipped")
             success = False
 
+        # 3.5. Run NetNavi Personality Harvester
+        harvester_script = os.path.join(_VAULT_ROOT, "usr", "scripts", "netnavi_style_harvester.py")
+        if os.path.exists(harvester_script):
+            logger.info("Running NetNavi Personality and Style Harvester...")
+            cmd = [sys.executable, harvester_script]
+            # Force update if a diary file has changed
+            if changed_files and any("003_Wiki/Diary" in f for f in changed_files):
+                cmd.append("--force")
+                logger.info("Diary change detected; forcing personality harvest update.")
+            proc = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            await proc.communicate()
+        else:
+            logger.warning("Personality harvester script not found at %s", harvester_script)
+
     except Exception as e:
         logger.error("Error running rebuild and diagnostics: %s", e)
         success = False

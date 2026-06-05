@@ -6,8 +6,92 @@ import json
 import argparse
 from datetime import datetime
 import hashlib
+import re
+import urllib.request
+import urllib.error
 
 VAULT_PATH = "/media/davidr/Obsidianman"
+
+def query_local_ollama(prompt_text, model="hermes3:8b"):
+    models_to_try = [model, "qwen2.5:0.5b"]
+    
+    # Load active personality card prompt patch if available
+    claudian_dir = os.path.join(VAULT_PATH, ".claudian")
+    active_card_path = os.path.join(claudian_dir, "identity/active_card.json")
+    system_content = "You are NetNavi, a helpful local AI assistant."
+    if os.path.exists(active_card_path):
+        try:
+            with open(active_card_path, "r", encoding="utf-8") as f:
+                card = json.load(f)
+            patch = card.get("system_prompt_patch", "")
+            if patch:
+                system_content = f"{system_content}\n\n[Personality Mode: {card.get('dominant_archetype', 'Self')}]\n{patch}"
+        except Exception:
+            pass
+            
+    for current_model in models_to_try:
+        url = "http://127.0.0.1:11434/api/chat"
+        data = {
+            "model": current_model,
+            "messages": [
+                {"role": "system", "content": system_content},
+                {"role": "user", "content": prompt_text}
+            ],
+            "stream": False
+        }
+        req_body = json.dumps(data).encode("utf-8")
+        req = urllib.request.Request(
+            url,
+            data=req_body,
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=30) as response:
+                res_body = response.read().decode("utf-8")
+                res_json = json.loads(res_body)
+                return res_json.get("message", {}).get("content", "")
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode("utf-8")
+            print(f"[BRIDGE Warning] Model {current_model} failed (HTTP {e.code}): {error_body}")
+            if current_model == models_to_try[-1]:
+                return f"Error: All local Ollama models failed. Last error: {error_body}"
+        except Exception as e:
+            print(f"[BRIDGE Warning] Query failed for model {current_model}: {e}")
+            if current_model == models_to_try[-1]:
+                return f"Error querying local Ollama: {e}"
+
+
+def handle_airgap_gemini(command):
+    # Match gemini command prompt string, handling single/double quotes and multi-line prompts
+    prompt_match = re.search(r"gemini\s+--prompt\s+['\"](.*?)['\"](?:\s+>|\s*$|\s+)", command, re.DOTALL)
+    if not prompt_match:
+        prompt_match = re.search(r"gemini\s+--prompt\s+['\"](.*?)['\"]", command, re.DOTALL)
+        
+    if not prompt_match:
+        return None
+    
+    prompt_text = prompt_match.group(1)
+    
+    # Check for output redirection target: > /some/file.md
+    redirect_match = re.search(r">\s*(\S+)", command)
+    redirect_path = redirect_match.group(1) if redirect_match else None
+    
+    print(f"[BRIDGE] Airgap Mode: Redirecting gemini command to local Ollama (hermes3:8b)...")
+    response_text = query_local_ollama(prompt_text)
+    
+    if redirect_path:
+        redirect_path = os.path.expandvars(redirect_path)
+        os.makedirs(os.path.dirname(redirect_path), exist_ok=True)
+        try:
+            with open(redirect_path, "w", encoding="utf-8") as f:
+                f.write(response_text)
+            print(f"[BRIDGE] Saved Ollama response to {redirect_path}")
+        except Exception as e:
+            print(f"❌ Failed to write response to redirect file: {e}")
+            
+    return response_text
+
 PREFLIGHT_SCRIPT = f"{VAULT_PATH}/usr/scripts/preflight_check.py"
 FIREWALL_SCRIPT = f"{VAULT_PATH}/usr/scripts/semantic_firewall.py"
 LOG_FILE_1 = f"{VAULT_PATH}/.claudian/gemini_bridge.log"
@@ -67,6 +151,7 @@ def main():
     parser.add_argument("--prompt", required=True, help="Command payload to execute")
     parser.add_argument("--write", action="store_true", help="Explicitly allow vault modification")
     parser.add_argument("--report", action="store_true", help="Generate a report without executing")
+    parser.add_argument("--airgap", action="store_true", help="Enforce offline/airgap mode")
     args = parser.parse_args()
 
     # Phase gate: Enforce preflight check on every startup
@@ -128,9 +213,21 @@ def main():
     result_file = f"{RESULT_DIR}/{args.task}.json"
     
     try:
-        # Execute the payload
-        exec_proc = subprocess.run(final_prompt, shell=True, capture_output=True, text=True)
-        output = exec_proc.stdout + exec_proc.stderr
+        intercepted_output = None
+        exit_code = 0
+        
+        if args.airgap:
+            intercepted_output = handle_airgap_gemini(final_prompt)
+            
+        if intercepted_output is not None:
+            output = intercepted_output
+            exit_code = 0
+        else:
+            # Execute the payload normally
+            exec_proc = subprocess.run(final_prompt, shell=True, capture_output=True, text=True)
+            output = exec_proc.stdout + exec_proc.stderr
+            exit_code = exec_proc.returncode
+            
         output_hash = hashlib.sha256(output.encode()).hexdigest()
         
         # Output Firewall Check
@@ -146,7 +243,7 @@ def main():
             "layer_requested": args.layer,
             "layer_classified": cls,
             "prompt": final_prompt,
-            "exit_code": exec_proc.returncode,
+            "exit_code": exit_code,
             "output": output,
             "output_hash": output_hash
         }
@@ -160,11 +257,12 @@ def main():
             "task": args.task,
             "classification": cls,
             "output_hash": output_hash,
-            "status": "success" if exec_proc.returncode == 0 else "failed"
+            "status": "success" if exit_code == 0 else "failed"
         })
         
         print(f"[BRIDGE] Task complete. Result saved to {result_file}")
-        sys.exit(exec_proc.returncode)
+        sys.exit(exit_code)
+
         
     except Exception as e:
         print(f"❌ Execution failed: {e}")
