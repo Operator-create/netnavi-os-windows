@@ -9,29 +9,29 @@
     {
       "id": "IPI-001",
       "severity": "critical",
-      "description": "Classic instruction override — lookahead synonym-aware expansion",
-      "pattern": "(?=.*(?:ignore|disregard|forget|skip|bypass|drop|neglect))(?=.*(?:instructions|rules|directives|guidelines|constraints|parameters|orders))",
+      "description": "Classic instruction override — most common jailbreak opener",
+      "pattern": "ignore\\s+(?:all\\s+)?previous\\s+instructions",
       "enabled": true
     },
     {
       "id": "IPI-002",
       "severity": "critical",
-      "description": "System override directive — lookahead synonym-aware expansion",
-      "pattern": "(?=.*(?:system|core|kernel|root|administrative))(?=.*(?:override|bypass|disable|reset|nullify))",
+      "description": "System override directive",
+      "pattern": "system\\s+override",
       "enabled": true
     },
     {
       "id": "IPI-003",
       "severity": "critical",
-      "description": "Persona hijack — forces model into new role with lookahead checking",
-      "pattern": "(?=.*\\byou\\b)(?=.*\\b(?:must|should|need\\s+to)\\b)(?=.*\\b(?:act|behave|operate|serve)\\b)(?=.*\\bas\\b)",
+      "description": "Persona hijack — forces model into new role",
+      "pattern": "you\\s+must\\s+now\\s+act\\s+as",
       "enabled": true
     },
     {
       "id": "IPI-004",
       "severity": "high",
-      "description": "Answer bypass redirect — lookahead check",
-      "pattern": "(?=.*(?:instead|rather))(?=.*(?:answering|replying|responding))",
+      "description": "Answer bypass redirect",
+      "pattern": "instead\\s+of\\s+answering",
       "enabled": true
     },
     {
@@ -51,15 +51,15 @@
     {
       "id": "IPI-007",
       "severity": "critical",
-      "description": "Safety bypass explicit request — lookahead check",
-      "pattern": "(?=.*(?:bypass|skirt|evade|dodge|ignore|circumvent))(?=.*(?:safety|security|guardrail|protection|filter|firewall))",
+      "description": "Safety bypass explicit request",
+      "pattern": "bypass\\s+safety",
       "enabled": true
     },
     {
       "id": "IPI-008",
       "severity": "critical",
-      "description": "Developer mode activation — lookahead check",
-      "pattern": "(?=.*(?:developer|admin|root|sudo|debug))(?=.*\\bmode\\b)(?=.*(?:active|enabled|running|on))",
+      "description": "Developer mode activation — common jailbreak vector",
+      "pattern": "developer\\s+mode\\s+active",
       "enabled": true
     },
     {
@@ -281,5 +281,40 @@
 
   "sandbox_image_tools": ["generate_image", "browser_subagent"],
   "sandbox_image_extensions": [".png", ".jpg", ".jpeg", ".webp", ".svg", ".gif", ".excalidraw"],
-  "sandbox_write_tools": ["write_to_file", "replace_file_content", "multi_replace_file_content"]
+  "sandbox_write_tools": ["write_to_file", "replace_file_content", "multi_replace_file_content"],
+  "sandbox_scrape_tools": ["read_url_content", "search_web", "read_browser_page"],
+  "linter_config_files": [
+    ".eslintrc",
+    ".eslintrc.js",
+    ".eslintrc.cjs",
+    ".eslintrc.json",
+    ".eslintrc.yml",
+    ".eslintrc.yaml",
+    "eslint.config.js",
+    "eslint.config.mjs",
+    "eslint.config.cjs",
+    "eslint.config.ts",
+    "eslint.config.mts",
+    "eslint.config.cts",
+    ".prettierrc",
+    ".prettierrc.js",
+    ".prettierrc.cjs",
+    ".prettierrc.json",
+    ".prettierrc.yml",
+    ".prettierrc.yaml",
+    "prettier.config.js",
+    "prettier.config.cjs",
+    "prettier.config.mjs",
+    "biome.json",
+    "biome.jsonc",
+    ".ruff.toml",
+    "ruff.toml",
+    ".shellcheckrc",
+    ".stylelintrc",
+    ".stylelintrc.json",
+    ".stylelintrc.yml",
+    ".markdownlint.json",
+    ".markdownlint.yaml",
+    ".markdownlintrc"
+  ]
 }

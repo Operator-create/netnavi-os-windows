@@ -162,6 +162,24 @@ async def run_rebuild_and_diagnostics(changed_files: Optional[List[str]] = None)
         else:
             logger.warning("Personality harvester script not found at %s", harvester_script)
 
+        # 3.6. Run Dual-Smart-Loop Engine (Persona + Data synthesis)
+        loop_script = os.path.join(_VAULT_ROOT, "usr", "scripts", "session_smart_loops.py")
+        if os.path.exists(loop_script):
+            logger.info("Running Session Smart Loops (Persona + Data)...")
+            proc = await asyncio.create_subprocess_exec(
+                sys.executable, loop_script,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await proc.communicate()
+            if proc.returncode == 0:
+                logger.info("Session Smart Loops completed successfully.")
+            else:
+                logger.warning("Session Smart Loops exited with code %d: %s",
+                               proc.returncode, stderr.decode().strip()[:200])
+        else:
+            logger.warning("session_smart_loops.py not found at %s", loop_script)
+
     except Exception as e:
         logger.error("Error running rebuild and diagnostics: %s", e)
         success = False
@@ -185,12 +203,14 @@ class VaultChangeTrigger:
         Callback triggered on file changes. Filters for .md changes
         and debounces execution to avoid compilation storms.
         """
-        # check if any markdown file changed
+        # check if any markdown file changed (exclude .claudian/ to prevent loop storms)
         md_changed = False
         changed_files = []
         for c in changes:
             # Change objects from watchfiles can have path as string or object
             path = getattr(c, "path", str(c))
+            if "/.claudian/" in path:
+                continue  # Skip .claudian/ outputs to prevent infinite trigger loops
             if path.endswith(".md"):
                 md_changed = True
                 changed_files.append(path)

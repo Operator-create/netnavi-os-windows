@@ -464,6 +464,17 @@ Analyze this text:
     print("🎉 Harvester run completed successfully!")
     return True
 
+def get_node_last_updated(node_id):
+    """Read the last_updated ISO string from the node's markdown frontmatter."""
+    path = os.path.join(NODES_DIR, f"{node_id}.md")
+    if not os.path.exists(path):
+        return None
+    try:
+        meta, _ = read_node_yaml(path)
+        return meta.get("last_updated")
+    except Exception:
+        return None
+
 def export_gephi_graph(weights):
     """Generates the GEXF graph file for Gephi visualization."""
     gexf = ET.Element("gexf", xmlns="http://www.gexf.net/1.2draft", version="1.2")
@@ -489,14 +500,46 @@ def export_gephi_graph(weights):
             "category": arch["cat"]
         })
         
-    # Build Edges with dynamic flow weights
+    # EML-based dynamic edge calculation with time decay
+    import math
+    now_ts = time.time()
+    
+    def calculate_decayed_edge_weight(src, tgt, base_w):
+        last_updated_str = get_node_last_updated(src)
+        t_days = 0.0
+        if last_updated_str:
+            try:
+                dt = datetime.fromisoformat(last_updated_str.replace("Z", "+00:00"))
+                last_updated_ts = dt.timestamp()
+                # Clock drift clamping: prevent negative time delta if file timestamp is from future
+                t_seconds = max(0.0, now_ts - last_updated_ts)
+                t_days = t_seconds / 86400.0
+            except Exception as ex:
+                print(f"⚠️ Error parsing last_updated for {src}: {ex}")
+        
+        # Logarithmic compression of source weight (outlier compression)
+        # scale base_w in [0, 1.0] to raw score equivalent [0, 5]
+        raw_score = base_w * 5.0
+        x = math.log(raw_score + 1.0) / math.log(6.0)
+        
+        # EML calculation: eml(x, y) = exp(x) - ln(y)
+        # clamp y to prevent log of zero domain crash
+        y = t_days + 1.0
+        eml_val = eml(x, y)
+        
+        # Sigmoid mapping to scale result between [0.05, 1.0]
+        sigmoid = 1.0 / (1.0 + math.exp(-eml_val))
+        decayed_w = 0.05 + 0.95 * sigmoid
+        return decayed_w
+
+    # Build Edges with dynamic flow weights using EML logic
     edges_spec = [
-        ("Hero", "Self", weights.get("Hero", 0.5) * weights.get("Self", 0.5)),
-        ("Shadow", "Self", weights.get("Shadow", 0.5) * weights.get("Self", 0.5)),
-        ("Caregiver", "Self", 0.8 * weights.get("Self", 0.5)),
-        ("Sage", "Self", 0.7 * weights.get("Self", 0.5)),
-        ("Rebel", "Self", 0.3 * weights.get("Self", 0.5)),
-        ("Hero", "Shadow", abs(weights.get("Hero", 0.5) - weights.get("Shadow", 0.5)))
+        ("Hero", "Self", calculate_decayed_edge_weight("Hero", "Self", weights.get("Hero", 0.5))),
+        ("Shadow", "Self", calculate_decayed_edge_weight("Shadow", "Self", weights.get("Shadow", 0.5))),
+        ("Caregiver", "Self", calculate_decayed_edge_weight("Caregiver", "Self", 0.8)),
+        ("Sage", "Self", calculate_decayed_edge_weight("Sage", "Self", 0.7)),
+        ("Rebel", "Self", calculate_decayed_edge_weight("Rebel", "Self", 0.3)),
+        ("Hero", "Shadow", calculate_decayed_edge_weight("Hero", "Shadow", abs(weights.get("Hero", 0.5) - weights.get("Shadow", 0.5))))
     ]
     
     for idx, (src, tgt, w) in enumerate(edges_spec):
@@ -504,7 +547,7 @@ def export_gephi_graph(weights):
             "id": str(idx),
             "source": src,
             "target": tgt,
-            "weight": f"{max(0.1, round(w, 2))}"
+            "weight": f"{round(w, 3)}"
         })
         
     tree = ET.ElementTree(gexf)

@@ -73,6 +73,8 @@ class RuleSet:
     sandbox_image_tools: list[str]
     sandbox_image_extensions: list[str]
     sandbox_write_tools: list[str]
+    sandbox_scrape_tools: list[str]
+    linter_config_files: list[str]
 
     @classmethod
     def load(cls, path: str = _DEFAULT_RULES_PATH) -> "RuleSet":
@@ -110,6 +112,8 @@ class RuleSet:
             sandbox_image_tools=raw.get("sandbox_image_tools", []),
             sandbox_image_extensions=raw.get("sandbox_image_extensions", []),
             sandbox_write_tools=raw.get("sandbox_write_tools", []),
+            sandbox_scrape_tools=raw.get("sandbox_scrape_tools", []),
+            linter_config_files=raw.get("linter_config_files", []),
         )
 
 

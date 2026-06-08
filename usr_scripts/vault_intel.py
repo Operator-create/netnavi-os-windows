@@ -50,12 +50,38 @@ def classify_note(filepath):
     run_bridge("classify_intel", gemini_cmd)
     print(f"✅ Metadata classification saved to staging area: {out_file}")
 
+def search_vault(query):
+    """Secure, Python-native search across the vault files."""
+    vault_root = os.path.join(VAULT_PATH, "Vault")
+    print(f"🔍 Searching vault for: '{query}'...")
+    results = []
+    
+    for root, dirs, files in os.walk(vault_root):
+        dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ('node_modules', 'venv', '.venv', 'cache', 'dist', 'build')]
+        for file in files:
+            if file.endswith('.md'):
+                filepath = os.path.join(root, file)
+                try:
+                    with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                        for idx, line in enumerate(f, 1):
+                            if query.lower() in line.lower():
+                                rel_path = os.path.relpath(filepath, vault_root)
+                                results.append(f"- **[[{rel_path[:-3]}]]** (line {idx}): {line.strip()}")
+                except Exception:
+                    pass
+                    
+    if results:
+        print("\n".join(results[:40]))  # Limit to top 40 results
+    else:
+        print("No matches found.")
+
 def main():
     parser = argparse.ArgumentParser(description="Skill 1: Obsidian Vault Intelligence")
     parser.add_argument("--draft", help="Topic to draft")
     parser.add_argument("--backlinks", help="Filepath to suggest backlinks for")
     parser.add_argument("--moc", help="Folder to generate MOC for")
     parser.add_argument("--classify", help="Filepath to classify and tag")
+    parser.add_argument("--search", help="Query to search across vault notes")
     
     args = parser.parse_args()
 
@@ -67,6 +93,8 @@ def main():
         generate_moc(args.moc)
     elif args.classify:
         classify_note(args.classify)
+    elif args.search:
+        search_vault(args.search)
     else:
         parser.print_help()
 

@@ -470,9 +470,10 @@ def build_firewall_config(base_config=None, rules_path: Optional[str] = None, to
     # Enable file change and periodic triggers if requested
     if enable_triggers:
         try:
-            from proactive_triggers import make_vault_watcher_trigger, make_periodic_diagnostics_trigger
+            from proactive_triggers import make_vault_watcher_trigger, make_periodic_diagnostics_trigger, make_telegram_inbox_trigger
             vault_trigger = make_vault_watcher_trigger()
             periodic_trigger = make_periodic_diagnostics_trigger(interval_seconds=3600)  # Hourly diagnostics
+            inbox_trigger = make_telegram_inbox_trigger()
             
             existing_triggers = getattr(base_config, "triggers", []) or []
             new_triggers = []
@@ -483,11 +484,15 @@ def build_firewall_config(base_config=None, rules_path: Optional[str] = None, to
             if periodic_trigger is not None:
                 new_triggers.append(periodic_trigger)
                 logger.info("Hourly periodic diagnostics trigger registered.")
+            if inbox_trigger is not None:
+                new_triggers.append(inbox_trigger)
+                logger.info("Telegram inbox file trigger registered.")
                 
             if new_triggers:
                 base_config.triggers = existing_triggers + new_triggers
         except Exception as e:
-            logger.error("Failed to register vault watcher or periodic triggers: %s", e)
+            logger.error("Failed to register vault watcher, periodic, or inbox triggers: %s", e)
+
 
     # Merge hooks and policies with any existing ones
     existing_hooks = getattr(base_config, "hooks", []) or []

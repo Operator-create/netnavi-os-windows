@@ -3,6 +3,7 @@ import os
 import re
 import sys
 import time
+import json
 
 VAULT_DIR = "/media/davidr/Obsidianman/Vault"
 INBOX_FILE = os.path.join(VAULT_DIR, "003_Wiki/Resources/+/proactive_inbox.md")
@@ -32,6 +33,8 @@ def scan_vault():
     # 2. Extract links and find broken ones
     broken_links = []
     link_pattern = re.compile(r'\[\[(.*?)\]\]')
+    tag_pattern = re.compile(r'#([a-zA-Z0-9_\-/]+)')
+    vault_map = {}
     
     # Map of lowercase file basenames (without .md) to their relative paths
     file_map = {}
@@ -45,25 +48,50 @@ def scan_vault():
                 content = f.read()
                 
             links = link_pattern.findall(content)
+            resolved_links = []
             for link in links:
                 # Handle wikilink alias e.g. [[Note|Alias]] or [[Note#Header]]
-                target = link.split('|')[0].split('#')[0].strip().lower()
-                if not target:
+                target = link.split('|')[0].split('#')[0].strip()
+                target_lower = target.lower()
+                if not target_lower:
                     continue
                     
                 # Check if target exists in our file map
-                if target not in file_map:
+                if target_lower in file_map:
+                    resolved_links.append(target)
+                else:
                     broken_links.append({
                         "source": rel_path,
                         "target": link
                     })
+            
+            # Extract tags (excluding hex colors or empty tags)
+            tags = list(set(tag_pattern.findall(content)))
+            tags = [t for t in tags if not (len(t) == 6 and all(c in '0123456789abcdefABCDEF' for c in t))]
+            
+            base_name = os.path.splitext(os.path.basename(rel_path))[0]
+            vault_map[base_name] = {
+                "path": rel_path,
+                "tags": tags,
+                "links": list(set(resolved_links))
+            }
         except Exception:
             pass
 
     # 3. Detect duplicates
     duplicates = {name: paths for name, paths in all_files.items() if len(paths) > 1}
     
-    return md_files, broken_links, duplicates
+    return md_files, broken_links, duplicates, vault_map
+
+def write_vault_map(vault_map):
+    map_file = os.path.join(VAULT_DIR, ".claudian/memory/vault_map.json")
+    os.makedirs(os.path.dirname(map_file), exist_ok=True)
+    try:
+        with open(map_file, 'w', encoding='utf-8') as f:
+            json.dump(vault_map, f, indent=2)
+        print(f"Vault map successfully exported to: {map_file}")
+    except Exception as e:
+        print(f"Error exporting vault map: {e}", file=sys.stderr)
 
 def write_report(md_files, broken_links, duplicates):
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -110,8 +138,9 @@ def write_report(md_files, broken_links, duplicates):
 
 def main():
     print("Running proactive diagnostics scan...")
-    md_files, broken_links, duplicates = scan_vault()
+    md_files, broken_links, duplicates, vault_map = scan_vault()
     write_report(md_files, broken_links, duplicates)
+    write_vault_map(vault_map)
     print(f"Report successfully written to: {INBOX_FILE}")
 
 if __name__ == "__main__":
