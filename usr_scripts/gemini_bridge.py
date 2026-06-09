@@ -10,31 +10,51 @@ import re
 import urllib.request
 import urllib.error
 
-VAULT_PATH = "/media/davidr/Obsidianman"
+VAULT_PATH = "${VAULT_PATH}"
+# Resolve path for compression and add to sys.path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from compression import compress_content
+from compression.task_classifier import classify_task_local
 
-def query_local_ollama(prompt_text, model="hermes3:8b"):
+def query_local_ollama(prompt_text, model="hermes3:8b", intensity_level="PRECISE", task_desc="General local query", token_budget="300"):
     models_to_try = [model, "qwen2.5:0.5b"]
     
-    # Load active personality card prompt patch if available
-    claudian_dir = os.path.join(VAULT_PATH, ".claudian")
-    active_card_path = os.path.join(claudian_dir, "identity/active_card.json")
-    system_content = "You are NetNavi, a helpful local AI assistant."
-    if os.path.exists(active_card_path):
-        try:
-            with open(active_card_path, "r", encoding="utf-8") as f:
-                card = json.load(f)
-            patch = card.get("system_prompt_patch", "")
-            if patch:
-                system_content = f"{system_content}\n\n[Personality Mode: {card.get('dominant_archetype', 'Self')}]\n{patch}"
-        except Exception:
-            pass
-            
+    caveman_prompt = f"""You are NetNavi, a helpful local AI assistant.
+
+## HERMES3:8B (OLLAMA) COMPRESSION SKILL — DYNAMIC MODE: {intensity_level}
+
+You are operating in **{intensity_level}** compression mode for this task.
+
+### If PRECISE:
+Before generating any response, mentally strip:
+✗ "I'll", "Let me", "Sure, I can", "Of course"  
+✗ "It's important to note that", "As you can see"
+✗ "Essentially", "Basically", "Simply put"
+✓ Keep: complete sentences, technical qualifiers, all code unchanged
+
+### If LITE:
+Additionally strip:
+✗ Transition words ("However", "Furthermore", "Additionally")
+✗ Post-block summaries when the code is self-evident
+✗ Section headers for single-topic responses
+✓ Use fragment sentences when meaning is unambiguous
+✓ Pattern: [thing] [problem] [fix]. [Code if needed.]
+
+### NEVER compress:
+- Error messages (quote verbatim)
+- Warnings about data loss, security, permissions
+- Multi-step instructions where skipping a step causes failure
+
+Current task context: {task_desc}
+Expected output density: {token_budget} tokens maximum
+"""
+
     for current_model in models_to_try:
         url = "http://127.0.0.1:11434/api/chat"
         data = {
             "model": current_model,
             "messages": [
-                {"role": "system", "content": system_content},
+                {"role": "system", "content": caveman_prompt},
                 {"role": "user", "content": prompt_text}
             ],
             "stream": False
@@ -50,7 +70,23 @@ def query_local_ollama(prompt_text, model="hermes3:8b"):
             with urllib.request.urlopen(req, timeout=30) as response:
                 res_body = response.read().decode("utf-8")
                 res_json = json.loads(res_body)
-                return res_json.get("message", {}).get("content", "")
+                response_text = res_json.get("message", {}).get("content", "")
+                
+                # Phase 2B: Sandbox Distillation Logger
+                distillation_log = f"{VAULT_PATH}/.claudian/distillation_dataset.jsonl"
+                os.makedirs(os.path.dirname(distillation_log), exist_ok=True)
+                with open(distillation_log, "a", encoding="utf-8") as f:
+                    log_entry = {
+                        "instruction": prompt_text,
+                        "input": "",
+                        "output": response_text,
+                        "model": current_model,
+                        "intensity_level": intensity_level,
+                        "timestamp": datetime.now().isoformat()
+                    }
+                    f.write(json.dumps(log_entry) + "\n")
+                    
+                return response_text
         except urllib.error.HTTPError as e:
             error_body = e.read().decode("utf-8")
             print(f"[BRIDGE Warning] Model {current_model} failed (HTTP {e.code}): {error_body}")
@@ -77,8 +113,23 @@ def handle_airgap_gemini(command):
     redirect_match = re.search(r">\s*(\S+)", command)
     redirect_path = redirect_match.group(1) if redirect_match else None
     
-    print(f"[BRIDGE] Airgap Mode: Redirecting gemini command to local Ollama (hermes3:8b)...")
-    response_text = query_local_ollama(prompt_text)
+    try:
+        class_info = classify_task_local(prompt_text)
+        intensity = class_info["caveman_mode"]
+        task_desc = f"Airgap Task: {class_info['task_type']}"
+        budget = "200" if intensity == "LITE" else "350"
+    except Exception:
+        intensity = "PRECISE"
+        task_desc = "Airgap Task"
+        budget = "300"
+
+    print(f"[BRIDGE] Airgap Mode: Redirecting gemini command to local Ollama ({intensity} mode)...")
+    response_text = query_local_ollama(
+        prompt_text,
+        intensity_level=intensity,
+        task_desc=task_desc,
+        token_budget=budget
+    )
     
     if redirect_path:
         redirect_path = os.path.expandvars(redirect_path)
@@ -95,7 +146,7 @@ def handle_airgap_gemini(command):
 PREFLIGHT_SCRIPT = f"{VAULT_PATH}/usr/scripts/preflight_check.py"
 FIREWALL_SCRIPT = f"{VAULT_PATH}/usr/scripts/semantic_firewall.py"
 LOG_FILE_1 = f"{VAULT_PATH}/.claudian/gemini_bridge.log"
-LOG_FILE_2 = f"{VAULT_PATH}/Vault/003_Wiki/Resources/+/gemini_audit_log.md"
+LOG_FILE_2 = f"{VAULT_PATH}/003_Resources/+/gemini_audit_log.md"
 RESULT_DIR = "/tmp/gemini_results"
 TEMPLATE_PATH = f"{VAULT_PATH}/usr/config/report_template.md"
 CHECKSUM_PATH = f"{VAULT_PATH}/usr/config/report_template.sha256"
@@ -237,6 +288,30 @@ def main():
                 out_data = json.loads(check_proc.stdout)
                 output = out_data["sanitized_content"]
         
+        # Input Compression (Track 3)
+        vault_path = os.environ.get("VAULT_PATH") or os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        db_path = os.path.join(vault_path, ".claudian", "compression_cache.db")
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        
+        filename_hint = None
+        # Extract filename hint from command if possible (e.g. for cat commands)
+        cat_match = re.search(r"\bcat\s+(\S+)", final_prompt)
+        if cat_match:
+            filename_hint = cat_match.group(1).strip("'\"")
+            
+        try:
+            compressed_output, was_compressed, class_info = compress_content(
+                content=output,
+                prompt_text=final_prompt,
+                db_path=db_path,
+                filename_hint=filename_hint
+            )
+            if was_compressed:
+                print(f"[BRIDGE] Input Compression Applied. Original saved to CCR Cache.")
+                output = compressed_output
+        except Exception as ce:
+            print(f"[BRIDGE Warning] Input compression failed: {ce}", file=sys.stderr)
+            
         # Structure the execution result
         result_payload = {
             "task": args.task,
